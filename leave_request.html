@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Request Form</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #1b3b73, #ffb6d9);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  form {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h2 {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+
+  label {
+    margin-top: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    box-sizing: border-box;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #004aad;
+  }
+
+  button {
+    margin-top: 22px;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: #004aad;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #0065c3;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 600px) {
+    body {
+      align-items: stretch;
+      padding: 0;
+    }
+
+    form {
+      padding: 15px;
+    }
+
+    h2 {
+      font-size: 20px;
+    }
+  }
+</style>
+</head>
+
+<body>
+<!-- Form -->
+<div class="form-container">
+<form id="leaveForm">
+
+    <h2>Request for Leave / Overtime</h2>
+
+    <label>Request Type</label>
+    <input type="text" id="LeaveType" placeholder="Enter request type" required>
+
+
+    <div id="dateRangeFields">
+        <label>From Date</label>
+        <input type="date" id="StartDate" required>
+
+        <label>To Date</label>
+        <input type="date" id="EndTime" required>
+    </div>
+
+    <div id="overtimeFields" style="display:none;">
+        <label>Date</label>
+        <input type="date" id="OT_Date">
+
+        <label>Start Time</label>
+        <input type="time" id="OT_StartTime">
+
+        <label>End Time</label>
+        <input type="time" id="OT_EndTime">
+    </div>
+
+    <label>Reason</label>
+    <textarea id="Reason" rows="3" placeholder="Enter your reason..." required></textarea>
+
+    <button type="submit">Submit Request</button>
+
+</form>
+</div>
+
+<script>
+document.getElementById("LeaveType").addEventListener("change", function () {
+    const type = this.value;
+    const dateRange = document.getElementById("dateRangeFields");
+    const overtimeFields = document.getElementById("overtimeFields");
+
+    if (type === "Overtime") {
+        dateRange.style.display = "none";
+        overtimeFields.style.display = "block";
+    } else {
+        dateRange.style.display = "block";
+        overtimeFields.style.display = "none";
+    }
+});
+
+document.getElementById("leaveForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const EmployeeID = sessionStorage.getItem("employeeID");
+
+    const data = {
+        EmployeeID: EmployeeID,
+        LeaveType: document.getElementById("LeaveType").value,
+        StartDate: document.getElementById("StartDate").value,
+        EndTime: document.getElementById("EndTime").value,
+        Reason: document.getElementById("Reason").value
+    };
+
+    const response = await fetch("http://localhost:5000/api/leave-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+    alert(result.message || "Đã gửi yêu cầu!");
+    window.location.href = "apply_form.html";
+});
+</script>
+
+</body>
+</html>

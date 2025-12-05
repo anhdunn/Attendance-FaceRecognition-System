@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register Department</title>
+  <link rel="stylesheet" href="register_department.css">
+</head>
+<body>
+  <div class="form-card">
+    <h2>Register New Department</h2>
+    <div class="form-group">
+      <label for="deptID">Department ID</label>
+      <input type="text" id="deptID" placeholder="e.g., IT01">
+    </div>
+
+    <div class="form-group">
+      <label for="deptName">Department Name</label>
+      <input type="text" id="deptName" placeholder="e.g., Information Technology">
+    </div>
+
+    <button id="btnAdd" class="btn">Add Department</button>
+    <p id="msg" class="message"></p>
+
+    <a href="department_list.html" class="back-link">← Back</a>
+  </div>
+
+  <script>
+    document.getElementById("btnAdd").addEventListener("click", async () => {
+      const id = document.getElementById("deptID").value.trim();
+      const name = document.getElementById("deptName").value.trim();
+      const msg = document.getElementById("msg");
+
+      msg.textContent = "";
+      msg.className = "message";
+
+      if (!id || !name) {
+        msg.textContent = "⚠️ Please fill all fields";
+        msg.classList.add("error");
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5000/api/register-department", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ DepartmentID: id, DepartmentName: name })
+        });
+
+        const data = await res.json();
+        msg.textContent = data.message;
+        msg.classList.add(data.success ? "success" : "error");
+      } catch (err) {
+        msg.textContent = "❌ Error: " + err.message;
+        msg.classList.add("error");
+      }
+    });
+  </script>
+</body>
+</html>

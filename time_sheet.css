@@ -1,0 +1,300 @@
+/* ===== GENERAL ===== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1b3b73, #ffb6d9);
+    background-attachment: fixed;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===== HEADER NHỎ GỌN ===== */
+.header-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;               /* giảm khoảng cách */
+    padding: 8px 12px;      /* padding nhỏ hơn */
+    background: linear-gradient(90deg, #4d94e9, #1b3b73);
+    color: white;
+    border-radius: 0 0 12px 12px; /* bo tròn nhỏ hơn */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: 0.3s ease;
+}
+
+.header-section:hover {
+    background: linear-gradient(90deg, #1b3b73, #4d94e9);
+}
+
+.header-section .avatar {
+    width: 40px;             /* nhỏ hơn */
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.8);
+    object-fit: cover;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.header-section .avatar:hover {
+    transform: scale(1.05);  /* scale nhẹ hơn */
+}
+
+.header-section .employee-info h3 {
+    margin: 0;
+    font-size: 14px;          /* nhỏ hơn */
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.header-section .employee-info p {
+    margin: 1px 0;
+    font-size: 10px;          /* nhỏ hơn */
+    opacity: 0.9;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+/* ===== STATS ROW NHỎ GỌN NHƯNG CHỮ LỚN HƠN ===== */
+.stats-section {
+    display: flex;
+    justify-content: space-around;
+    gap: 6px;           
+    padding: 4px 0;     
+}
+
+.stat-box {
+    background: white;
+    flex: 1;
+    padding: 6px;       
+    border-radius: 8px; 
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1); 
+    transition: 0.2s ease;
+}
+
+.stat-box:hover { transform: scale(1.02); }
+
+.stat-box i {
+    font-size: 16px;    /* icon to hơn xíu */
+    color: #007aff;
+}
+
+.stat-box .summary-value { 
+    font-size: 14px;    /* tăng chữ số */
+    font-weight: bold; 
+    color: #0056c9; 
+}
+
+.stat-box .summary-title { 
+    font-size: 12px;    /* tăng chữ mô tả */
+    color: #666; 
+}
+
+
+/* ===== CALENDAR CARD ===== */
+.calendar-wrapper {
+    flex: 1;
+    background: white;
+    margin: 8px 10px;
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+/* Header */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.calendar-header h3 {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 700;
+    color: #0a3d91;
+}
+
+.calendar-header select {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid #a8c7ff;
+    font-size: 13px;
+    background-color: #f0f6ff;
+    color: #0a3d91;
+    transition: 0.2s ease;
+}
+.calendar-header select:hover {
+    background-color: #e3eeff;
+}
+
+/* Calendar Grid */
+#calendar {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    background: #f7f9fe;
+    padding: 10px;
+    border-radius: 12px;
+}
+
+/* Ô tiêu đề thứ trong tuần */
+.day.header {
+    font-weight: 600;
+    text-align: center;
+    background: linear-gradient(135deg, #007aff, #0056c9);
+    color: white;
+    border-radius: 8px;
+    padding: 6px 0;
+    letter-spacing: 0.3px;
+}
+
+/* Ô ngày bình thường */
+.day {
+    background-color: #f2f6ff;
+    border-radius: 10px;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 13px;
+    color: #0b348c;
+    font-weight: 600;
+    border: 1px solid #d7e0ff;
+    transition: all 0.2s ease;
+}
+
+/* Ngày hôm nay */
+.day.today {
+    background: linear-gradient(135deg, #b3d4ff, #e0edff);
+    border: 2px solid #007aff;
+    box-shadow: 0 0 6px rgba(0,122,255,0.3);
+}
+
+/* Hover hiệu ứng */
+.day:hover {
+    background-color: #e3ecff;
+    transform: translateY(-2px);
+    cursor: pointer;
+}
+
+/* Ngày có trạng thái chấm công */
+.day.present {
+    background-color: #d8f8e1;
+    border: 1px solid #89d5a4;
+    color: #006b2f;
+}
+
+.day.late {
+    background-color: #ffe2e2;
+    border: 1px solid #f38b8b;
+    color: #8a1a1a;
+}
+
+/* Ngày nghỉ (nếu cần thêm sau) */
+.day.absent {
+    background-color: #fff3c4;
+    border: 1px solid #f2c94c;
+    color: #7a5b00;
+}
+
+/* Legend */
+.calendar-legend {
+    display: flex;
+    justify-content: center; /* căn giữa theo hàng ngang */
+    align-items: center;
+    gap: 14px; /* khoảng cách nhỏ gọn hơn */
+    margin-top: 10px;
+    font-size: 12px; /* nhỏ hơn để không chiếm diện tích */
+    background: #f9fbff;
+    padding: 6px 8px; /* giảm padding */
+    border-radius: 8px;
+    box-shadow: inset 0 0 3px rgba(0,0,0,0.05);
+    white-space: nowrap; /* ⚡ giữ 1 dòng, không xuống hàng */
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+.color-box {
+    width: 12px; /* nhỏ gọn */
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.color-box.present { background-color: #d8f8e1; }
+.color-box.late { background-color: #ffe2e2; }
+.color-box.absent { background-color: #fff3c4; }
+.color-box.today { background-color: #b3d4ff; }
+
+
+nav.navbar {
+    background: white;
+    padding: 6px 0;
+    border-top: 1px solid #007aff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+nav button {
+    background: none;
+    border: none;
+    color: #007aff;
+    font-size: 18px;
+    width: 36px;          /* chiều rộng cố định */
+    height: 36px;         /* chiều cao cố định */
+    border-radius: 50%;   /* bo tròn */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s ease;
+}
+
+/* Nút active */
+nav button.active {
+    background-color: #007aff; /* màu xanh */
+    color: white;              /* icon trắng */
+}
+
+nav button:hover {
+    background-color: rgba(0,122,255,0.2);
+}
+
+
+/* ===== POPUP DETAIL ===== */
+.day-detail-popup {
+    position: fixed;
+    top: 28%;
+    left: 50%;
+    transform: translate(-50%, -10%);
+    width: 220px;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4);
+    animation: fadeIn 0.25s ease;
+    font-size: 12px;
+}
+
+.day-detail-popup button {
+    margin-top: 8px;
+    width: 100%;
+    padding: 6px;
+    border-radius: 6px;
+    background: #007aff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

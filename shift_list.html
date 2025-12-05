@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Shifts - Smart Attendance</title>
+<link rel="stylesheet" href="shift_list.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>Admin</h2>
+        </div>
+        <ul class="menu">
+          <li onclick="location.href='admin_dashboard.html'"><i class="fas fa-home"></i> Dashboard</li>
+          <li onclick="location.href='employee_list.html'"><i class="fas fa-users"></i> Employees</li>
+          <li onclick="location.href='department_list.html'"><i class="fas fa-building"></i> Departments</li>
+          <li onclick="location.href='attendance_list.html'"><i class="fas fa-calendar-check"></i> Attendance</li>
+          <li class="active" onclick="location.href='shift_list.html'"><i class="fas fa-clock"></i> Work Shifts</li>
+          <li onclick="location.href='schedule_list.html'"><i class="fas fa-calendar-alt"></i> Work Schedule</li>
+          <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Work Shifts</h1>
+            <button class="add-btn" onclick="location.href='add_shift.html'">
+                <i class="fas fa-plus"></i> Add Shift
+            </button>
+        </header>
+
+        <section class="table-section">
+                <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="shiftTable"></tbody>
+
+            </table>
+        </section>
+    </main>
+</div>
+
+
+<script>
+    function formatTime(timeString) {
+  if (!timeString) return "";
+  try {
+    // Chuyển chuỗi ISO thành giờ:phút (HH:mm)
+    const date = new Date(timeString);
+    const hours = date.getUTCHours().toString().padStart(2, "0");
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+  } catch {
+    return timeString; // fallback nếu lỗi
+  }
+}
+
+async function loadShifts() {
+  try {
+    const res = await fetch("http://localhost:5000/api/calam");
+    const shifts = await res.json();
+
+    const table = document.getElementById("shiftTable");
+    table.innerHTML = "";
+
+    shifts.forEach(shift => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+        <td>${shift.CaName}</td>
+        <td>${formatTime(shift.StartTime)}</td>
+        <td>${formatTime(shift.EndTime)}</td>
+        <td>
+            <button class="action-btn edit" title="Edit Shift" onclick="editShift('${shift.CaName}')">
+                ✏️ 
+            </button>
+            <button class="action-btn delete" title="Delete Shift" onclick="deleteShift('${shift.CaName}')">
+                🗑️ 
+            </button>
+        </td>
+    `;
+    table.appendChild(tr);
+    });
+  } catch (err) {
+    console.error("❌ Error loading shifts:", err);
+  }
+}
+
+async function deleteShift(name) {
+  if (!confirm(`Delete shift "${name}"?`)) return;
+  const res = await fetch(`http://localhost:5000/api/calam/${name}`, { method: "DELETE" });
+  if (res.ok) {
+    alert("Deleted successfully!");
+    loadShifts();
+  } else {
+    alert("Delete failed!");
+  }
+}
+
+function editShift(name) {
+  window.location.href = `edit_shift.html?CaName=${encodeURIComponent(name)}`;
+}
+
+
+function handleLogout() {
+  // Xóa thông tin đăng nhập
+  sessionStorage.removeItem('employeeName');
+  sessionStorage.removeItem('employeeID');
+
+  // Chuyển hướng về trang login
+  window.location.href = 'login.html';
+}
+loadShifts();
+</script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</body>
+</html>

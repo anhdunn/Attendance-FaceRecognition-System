@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Shift</title>
+  <link rel="stylesheet" href="edit_shift.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h2><i class="fa-solid fa-pen-to-square"></i> Edit Shift</h2>
+
+    <form id="editShiftForm">
+      <div class="form-group">
+        <label for="CaName">Shift Name</label>
+        <input type="text" id="CaName" name="CaName" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="StartTime">Start Time</label>
+        <input type="time" id="StartTime" name="StartTime" required>
+      </div>
+
+      <div class="form-group">
+        <label for="EndTime">End Time</label>
+        <input type="time" id="EndTime" name="EndTime" required>
+      </div>
+
+      <div class="buttons">
+        <button type="submit" class="save-btn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button type="button" class="cancel-btn" onclick="window.history.back()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Lấy param trên URL (?CaName=CaSang)
+    const params = new URLSearchParams(window.location.search);
+    const caName = params.get("CaName");
+
+    // Load dữ liệu ca làm
+    async function loadShift() {
+      const res = await fetch(`http://localhost:5000/api/shifts/${caName}`);
+      const data = await res.json();
+
+      document.getElementById("CaName").value = data.CaName;
+      document.getElementById("StartTime").value = data.StartTime.slice(0, 5);
+      document.getElementById("EndTime").value = data.EndTime.slice(0, 5);
+    }
+
+    // Gửi cập nhật
+    document.getElementById("editShiftForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const shift = {
+        StartTime: document.getElementById("StartTime").value,
+        EndTime: document.getElementById("EndTime").value,
+      };
+
+      const res = await fetch(`http://localhost:5000/api/shifts/${caName}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(shift),
+      });
+
+      if (res.ok) {
+        alert("✅ Shift updated successfully!");
+        window.location.href = "shift_list.html"; // trở lại trang danh sách
+      } else {
+        alert("❌ Failed to update shift!");
+      }
+    });
+
+    loadShift();
+  </script>
+</body>
+</html>

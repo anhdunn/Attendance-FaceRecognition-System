@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Work Schedule</title>
+  <link rel="stylesheet" href="edit_shift.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h2><i class="fa-solid fa-calendar-plus"></i> Add Work Schedule</h2>
+
+    <form id="addScheduleForm">
+      <div class="form-group">
+        <label for="EmployeeID">Employee</label>
+        <select id="EmployeeID" required></select>
+      </div>
+
+      <div class="form-group">
+        <label for="CaName">Shift</label>
+        <select id="CaName" required></select>
+      </div>
+
+      <div class="form-group">
+        <label for="WorkDate">Work Date</label>
+        <input type="date" id="WorkDate" required>
+      </div>
+
+      <div class="buttons">
+        <button type="submit" class="save-btn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button type="button" class="cancel-btn" onclick="window.history.back()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+ async function loadDropdowns() {
+  const [employeesRes, shiftsRes] = await Promise.all([
+    fetch("http://localhost:5000/api/employees"),
+    fetch("http://localhost:5000/api/calam")
+  ]);
+
+  const employees = await employeesRes.json();
+  const shifts = await shiftsRes.json();
+
+  const empSelect = document.getElementById("EmployeeID");
+  const shiftSelect = document.getElementById("CaName");
+
+  // Hiển thị nhân viên
+  employees.forEach(e => {
+    const opt = document.createElement("option");
+    opt.value = e.EmployeeID;
+
+    // Kiểm tra thuộc tính tồn tại (tùy theo API trả về)
+    const name =
+      e.E_FullName ||
+      e.FullName ||
+      e.Name ||
+      "(Unknown)";
+      
+    opt.textContent = `${e.EmployeeID} - ${name}`;
+    empSelect.appendChild(opt);
+  });
+
+shifts.forEach(s => {
+  const opt = document.createElement("option");
+  opt.value = s.CaName;
+  opt.textContent = `${s.CaName}`;
+  shiftSelect.appendChild(opt);
+});
+
+}
+
+
+  document.getElementById("addScheduleForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const schedule = {
+      EmployeeID: document.getElementById("EmployeeID").value,
+      CaName: document.getElementById("CaName").value,
+      WorkDate: document.getElementById("WorkDate").value
+    };
+
+    const res = await fetch("http://localhost:5000/api/schedule", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(schedule)
+    });
+
+    if (res.ok) {
+      alert("✅ Schedule added successfully!");
+      window.location.href = "schedule_list.html";
+    } else {
+      alert("❌ Failed to add schedule!");
+    }
+  });
+
+  loadDropdowns();
+  </script>
+</body>
+</html>

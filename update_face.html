@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Cập nhật khuôn mặt</title>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 20px;
+    }
+    #videoContainer { position: relative; display: inline-block; }
+    #video {
+      border-radius: 10px;
+      background: #000;
+      transform: scaleX(-1);
+      object-fit: cover;
+    }
+
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      width: 320px;
+      height: 400px;
+    }
+    #captureBtn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #0078D4;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Cập nhật khuôn mặt</h2>
+  <div id="videoContainer">
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="overlay"></canvas>
+  </div><br>
+  <button id="captureBtn">📸 Chụp & cập nhật</button>
+
+  <!-- Face API -->
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script>
+const video = document.getElementById('video');
+const overlay = document.getElementById('overlay');
+const ctx = overlay.getContext('2d');
+
+const DISPLAY_WIDTH = 320;
+const DISPLAY_HEIGHT = 400;
+
+overlay.width = DISPLAY_WIDTH;
+overlay.height = DISPLAY_HEIGHT;
+
+// 🚀 Load models
+async function loadModels() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri('./models');
+  await faceapi.nets.faceLandmark68Net.loadFromUri('./models');
+  await faceapi.nets.faceRecognitionNet.loadFromUri('./models');
+  console.log("✅ Models loaded");
+  startCamera();
+  detectLoop();
+}
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    await video.play();
+    console.log("✅ Camera started");
+  } catch (err) {
+    console.error("❌ Không mở được camera:", err);
+    alert("Không thể truy cập camera. Hãy bật quyền camera!");
+  }
+}
+
+//Vẽ khung vàng hoặc xanh theo độ ổn định khuôn mặt
+async function detectLoop() {
+  const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 320 });
+  let lastBox = null;
+  let lostFrames = 0;
+
+  setInterval(async () => {
+    if (!video.videoWidth || !video.videoHeight) return;
+
+    // Phát hiện khuôn mặt
+    const result = await faceapi.detectSingleFace(video, options);
+
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+    // Nếu có kết quả và box hợp lệ
+    if (result && result.box && typeof result.box.x === "number") {
+      lostFrames = 0;
+      lastBox = result.box;
+    } else if (lastBox) {
+      // Không phát hiện tạm thời — dùng khung cũ trong 10 khung hình (~2s)
+      lostFrames++;
+      if (lostFrames > 10) lastBox = null;
+    }
+
+    // Vẽ khung nếu lastBox hợp lệ
+    if (lastBox && lastBox.width > 0 && lastBox.height > 0) {
+      const padding = 0.25;
+      const newX = Math.max(0, lastBox.x - lastBox.width * padding / 2);
+      const newY = Math.max(0, lastBox.y - lastBox.height * padding / 2);
+      const newW = lastBox.width * (1 + padding);
+      const newH = lastBox.height * (1 + padding);
+
+      const scaleX = DISPLAY_WIDTH / video.videoWidth;
+      const scaleY = DISPLAY_HEIGHT / video.videoHeight;
+
+      const mappedBox = {
+        x: newX * scaleX,
+        y: newY * scaleY,
+        width: newW * scaleX,
+        height: newH * scaleY
+      };
+
+      // Lật khung cho khớp video
+      const mirroredX = DISPLAY_WIDTH - mappedBox.x - mappedBox.width;
+
+      const centerX = mappedBox.x + mappedBox.width / 2;
+      const centerY = mappedBox.y + mappedBox.height / 2;
+
+      const stable =
+        Math.abs(centerX - DISPLAY_WIDTH / 2) < 50 &&
+        Math.abs(centerY - DISPLAY_HEIGHT / 2) < 50 &&
+        mappedBox.width > 120 &&
+        mappedBox.height > 120;
+
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = stable ? "#00FF00" : "#FFD700";
+      ctx.strokeRect(mirroredX, mappedBox.y, mappedBox.width, mappedBox.height);
+    }
+  }, 200);
+}
+
+
+// Khi click nút chụp
+document.getElementById("captureBtn").addEventListener("click", async () => {
+  const EmployeeID = sessionStorage.getItem("employeeID");
+  if (!EmployeeID) {
+    alert("Không tìm thấy thông tin nhân viên. Hãy đăng nhập lại!");
+    location.href = "login.html";
+    return;
+  }
+
+  if (!video.srcObject) {
+    alert("Camera chưa sẵn sàng.");
+    return;
+  }
+
+  // Phát hiện khuôn mặt và tạo descriptor
+  const detection = await faceapi
+    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+    .withFaceLandmarks()
+    .withFaceDescriptor();
+
+  if (!detection) {
+    alert("❌ Không phát hiện được khuôn mặt. Hãy thử lại!");
+    return;
+  }
+
+  const descriptor = Array.from(detection.descriptor);
+
+  // Gửi descriptor về server
+  try {
+    const response = await fetch("/api/update-face", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ EmployeeID, descriptor })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      alert("✅ Cập nhật khuôn mặt thành công!");
+    } else {
+      alert("❌ Lỗi: " + result.message);
+    }
+  } catch (err) {
+    console.error("❌ Upload face failed:", err);
+    alert("Lỗi khi gửi dữ liệu khuôn mặt lên server.");
+  }
+});
+
+loadModels();
+</script>
+
+</body>
+</html>

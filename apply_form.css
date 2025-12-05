@@ -1,0 +1,176 @@
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(135deg, #1b3b73, #ffb6d9);
+    background-attachment: fixed;
+}
+
+
+
+@keyframes bgMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+.page-wrapper {
+    padding: 25px 20px 90px;
+}
+
+/* Header */
+.header h2 {
+    color: white;
+    font-size: 26px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Big card button */
+.big-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.15);
+    padding: 18px 20px;
+    border-radius: 16px;
+    border: none;
+    backdrop-filter: blur(12px);
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.big-button:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.23);
+}
+
+.icon-wrap {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: white;
+    color: #007AFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    margin-right: 12px;
+}
+
+.text .title {
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+}
+
+.text .subtitle {
+    font-size: 13px;
+    opacity: 0.8;
+    color: #dbe9ff;
+}
+
+.arrow {
+    margin-left: auto;
+    color: white;
+}
+
+/* History section */
+.history-container {
+    margin-top: 25px;
+    color: white;
+}
+
+.history-container h3 {
+    margin-bottom: 12px;
+}
+
+/* History list */
+.request-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.request-item {
+    background: rgba(255,255,255,0.18);
+    padding: 15px;
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+.req-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+}
+
+.req-date {
+    font-size: 13px;
+    color: #cfe3ff;
+}
+
+.status {
+    padding: 4px 12px;
+    border-radius: 10px;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.pending { background: #f59e0b; }
+.approved { background: #22c55e; }
+.rejected { background: #ef4444; }
+
+.empty {
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    opacity: 0.8;
+    padding: 15px;
+}
+
+
+.navbar {
+    position: fixed;     
+    bottom: 0;            
+    left: 0;              
+    width: 100%;          
+    background: white;
+    padding: 6px 0;
+    border-top: 1px solid #007aff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;        
+}
+
+.navbar button {
+    background: none;
+    border: none;
+    color: #007aff;
+    font-size: 18px;
+    width: 36px;          
+    height: 36px;         
+    border-radius: 50%;   
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.2s ease;
+}
+
+.navbar .active {
+    color: white;
+    background: #007AFF;
+    padding: 8px 15px;
+    border-radius: 15px;
+}
+
+.navbar button:hover {
+    background-color: rgba(0,122,255,0.2);
+}
+
+.page-wrapper {
+    padding: 25px 20px 90px; 
+}

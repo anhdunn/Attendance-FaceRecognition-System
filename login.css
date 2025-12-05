@@ -1,0 +1,153 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    font-family: "Arial", sans-serif;
+
+    background: linear-gradient(135deg, #0e2a55, #ff9ec9); /* xanh đậm hơn - hồng nhẹ hơn */
+    background-attachment: fixed;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+/* === CONTAINER LOGIN === */
+.login-container {
+    text-align: center;
+    color: white;
+}
+
+/* === TIÊU ĐỀ === */
+h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.subtitle {
+    font-size: 15px;
+    margin-bottom: 40px;
+    color: #cfe3ff;
+}
+
+/* === GẠCH NGANG INPUT === */
+.input-line {
+    width: 250px;
+    padding: 14px 0;
+    margin-bottom: 28px;
+
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(255,255,255,0.6);
+    color: white;
+    font-size: 16px;
+    text-align: center;
+
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-line:focus {
+    border-bottom: 2px solid #00A8FF;
+}
+
+.input-line::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+/* === PASSWORD ICON === */
+.password-wrapper {
+    position: relative;
+    width: 250px;
+    margin: 0 auto 28px;
+}
+
+.togglePassword {
+    position: absolute;
+    right: 0;
+    top: 6px;
+    font-size: 20px;
+    cursor: pointer;
+    user-select: none;
+    color: white;
+}
+
+/* === BUTTON === */
+button {
+    width: 150px;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #2061a7, #2061a7);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: block;
+    margin: 0 auto;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+#statusMsg {
+    margin-top: 10px;
+}
+/* Support button (Top-right) */
+.support-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #1a3e6f;
+    padding: 10px 12px;
+    border-radius: 50%;
+    font-size: 20px;
+    text-decoration: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    transition: 0.25s;
+    backdrop-filter: blur(5px);
+}
+
+.support-btn:hover {
+    background: #1a3e6f;
+    color: white;
+    transform: scale(1.1);
+}
+/* Ẩn icon Reveal Password mặc định của Chrome */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none !important;
+}
+
+input[type="password"]::-webkit-textfield-decoration-container {
+    display: none !important;
+}
+/* Forgot Password link */
+.forgot-link {
+    display: block;
+    margin-top: 12px;
+    font-size: 14px;
+    color: #e6f0ff;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.forgot-link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}

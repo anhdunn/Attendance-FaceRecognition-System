@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Form</title>
+    <link rel="stylesheet" href="apply_form.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <header class="header">
+        <h2><i class="fa-regular fa-paper-plane"></i> Apply Request</h2>
+    </header>
+
+    <div class="action-box">
+        <button class="big-button" onclick="location.href='leave_request.html'">
+            <div class="icon-wrap"><i class="fa-regular fa-file-lines"></i></div>
+            <div class="text">
+                <span class="title">Gửi yêu cầu nghỉ / OT</span>
+                <span class="subtitle">Tạo yêu cầu ngay</span>
+            </div>
+            <i class="fa-solid fa-chevron-right arrow"></i>
+        </button>
+    </div>
+
+    <!-- History Section -->
+    <section class="history-container">
+        <h3>Lịch sử yêu cầu</h3>
+        <div id="requestList" class="request-list"></div>
+    </section>
+
+</div>
+
+<!-- Bottom navigation -->
+<nav class="navbar">
+    <button onclick="location.href='mainform.html'"><i class="fa-solid fa-house"></i></button>
+    <button class="active" onclick="location.href='apply_form.html'"><i class="fa-regular fa-file-lines"></i></button>
+    <button onclick="location.href='time_sheet.html'"><i class="fa-regular fa-clock"></i></button>
+    <button onclick="location.href='account.html'"><i class="fa-regular fa-user"></i></button>
+</nav>
+
+
+<script>
+async function loadRequests() {
+  const employeeID = sessionStorage.getItem("employeeID");
+  if (!employeeID) return;
+
+  const res = await fetch(`http://localhost:5000/api/leave-request/history/${employeeID}`);
+  const result = await res.json();
+
+  const list = document.getElementById("requestList");
+  list.innerHTML = "";
+
+  const requests = result.history;
+
+  if (!Array.isArray(requests) || requests.length === 0) {
+    list.innerHTML = "<p class='empty'>Chưa có yêu cầu nào</p>";
+    return;
+  }
+
+  requests.forEach(r => {
+    const div = document.createElement("div");
+    div.classList.add("request-item");
+
+    div.innerHTML = `
+      <div class="left">
+        <span class="req-title">${r.LeaveType}</span>
+        <span class="req-date">${r.StartDate.slice(0,10)} → ${r.EndTime.slice(0,10)}</span>
+      </div>
+      <span class="status ${r.Status.toLowerCase()}">${r.Status}</span>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+loadRequests();
+</script>
+
+</body>
+</html>

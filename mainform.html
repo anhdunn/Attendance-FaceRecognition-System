@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance - Dashboard</title>
+    <link rel="stylesheet" href="mainform.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header class="page-header">
+    <h2>Time Attendance System</h2>
+</header>
+
+<main class="container">
+ <div class="checkin-section">
+
+    <div class="scan-frame">
+        <img src="face-scan.jpg" class="face-icon" alt="Face scanning">
+        <div class="scan-line"></div>
+    </div>
+
+    <p class="current-time" id="currentTime">--:--:--</p>
+
+    <!-- Nhóm nút chính -->
+    <div class="main-buttons">
+        <button class="checkin-btn" id="checkinBtn">Check In</button>
+        <button class="checkout-btn" id="checkoutBtn">Check Out</button>
+        <a href="update_face.html" class="checkin-btn" id="updateFaceBtn">
+            <i class="fa-regular fa-face-smile"></i> Register Face
+        </a>
+    </div>
+
+    <!-- Nút trạng thái chấm công riêng -->
+    <div class="status-container">
+        <button class="status-btn" onclick="location.href='check_status.html'">
+            <i class="fa-solid fa-clipboard-check"></i> Xem trạng thái chấm công
+        </button>
+    </div>
+
+</div>
+
+</main>
+
+<nav class="navbar">
+      <button class="active"  onclick="location.href='mainform.html'"><i class="fa-solid fa-house"></i></button>
+      <button onclick="location.href='apply_form.html'"><i class="fa-regular fa-file-lines"></i></button>
+      <button onclick="location.href='time_sheet.html'"><i class="fa-regular fa-clock"></i></button>
+      <button onclick="location.href='account.html'"><i class="fa-regular fa-user"></i></button>
+</nav>
+
+<script src="mainform.js" defer></script>
+
+</body>
+</html>

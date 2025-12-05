@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance</title>
+    <link rel="stylesheet" href="attendance.css">
+</head>
+<body>
+    <div class="iphone">
+        <div class="screen">
+            <div class="header">
+                <h2> Attendance</h2>
+            </div>
+
+            <div class="avatar-section">
+                <img id="avatar" src="https://i.pravatar.cc/100" alt="Avatar">
+                <p id="employeeName">AD</p>
+                <input type="file" id="uploadAvatar" accept="image/*">
+            </div>
+
+            <div class="status-section">
+                <p id="status">Status: Not checked in</p>
+                <p id="time"></p>
+            </div>
+
+            <div class="buttons-section">
+                <button onclick="checkIn()">Check-in</button>
+                <button onclick="checkOut()">Check-out</button>
+                <button class="back-btn" onclick="goHome()">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goHome() {
+            location.href = 'index.html';
+        }
+
+        function checkIn() {
+            const now = new Date();
+            document.getElementById('status').innerText = 'Status: Checked in';
+            document.getElementById('time').innerText = 'Time: ' + now.toLocaleTimeString();
+        }
+
+        function checkOut() {
+            const now = new Date();
+            document.getElementById('status').innerText = 'Status: Checked out';
+            document.getElementById('time').innerText = 'Time: ' + now.toLocaleTimeString();
+        }
+
+        // Xử lý upload avatar
+        const uploadInput = document.getElementById('uploadAvatar');
+        const avatarImg = document.getElementById('avatar');
+
+        uploadInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarImg.src = e.target.result; // hiển thị ảnh mới
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

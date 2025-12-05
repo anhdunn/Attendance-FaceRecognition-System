@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Employee</title>
+<link rel="stylesheet" href="admin_dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #444;
+}
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+}
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+}
+.save-btn {
+    background-color: #007bff;
+    color: white;
+}
+.save-btn:hover {
+    background-color: #0056b3;
+}
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    margin-left: 10px;
+}
+.cancel-btn:hover {
+    background-color: #5a6268;
+}
+.status-message {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 500;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h2><i class="fas fa-user-edit"></i> Edit Employee</h2>
+
+    <form id="editForm">
+        <div class="form-group">
+            <label for="employeeID">Employee ID</label>
+            <input type="text" id="employeeID" readonly>
+        </div>
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" required>
+        </div>
+        <div class="form-group">
+            <label for="department">Department</label>
+            <input type="text" id="department">
+        </div>
+        <div class="form-group">
+            <label for="position">Position</label>
+            <input type="text" id="position">
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone">
+        </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+
+        <div style="text-align: center;">
+            <button type="submit" class="save-btn"><i class="fas fa-save"></i> Save Changes</button>
+            <button type="button" class="cancel-btn" onclick="window.location.href='employee_list.html'"><i class="fas fa-arrow-left"></i> Cancel</button>
+        </div>
+        <p id="statusMsg" class="status-message"></p>
+    </form>
+</div>
+
+<script>
+// --- Lấy ID từ URL ---
+const urlParams = new URLSearchParams(window.location.search);
+const employeeID = urlParams.get('id');
+
+if (!employeeID) {
+    document.body.innerHTML = "<h2 style='text-align:center;color:red;'>❌ Employee ID not found.</h2>";
+}
+
+// --- Khi trang load ---
+window.onload = async () => {
+    await loadEmployeeData(employeeID);
+};
+
+// --- Hàm tải dữ liệu nhân viên ---
+async function loadEmployeeData(id) {
+    try {
+        const res = await fetch(`http://localhost:5000/api/employees/${id}`);
+        const data = await res.json();
+
+        if (data && data.EmployeeID) {
+            document.getElementById('employeeID').value = data.EmployeeID;
+            document.getElementById('fullName').value = data.FullName;
+            document.getElementById('department').value = data.DepartmentName || "";
+            document.getElementById('position').value = data.Position || "";
+            document.getElementById('phone').value = data.Phone || "";
+            document.getElementById('status').value = data.IsActive ? "Active" : "Inactive";
+        } else {
+            document.getElementById('statusMsg').textContent = "Employee not found.";
+            document.getElementById('statusMsg').style.color = "red";
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById('statusMsg').textContent = "Error loading employee data.";
+        document.getElementById('statusMsg').style.color = "red";
+    }
+}
+
+// --- Lưu thay đổi ---
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const emp = {
+        EmployeeID: document.getElementById('employeeID').value,
+        FullName: document.getElementById('fullName').value,
+        DepartmentName: document.getElementById('department').value,
+        Position: document.getElementById('position').value,
+        Phone: document.getElementById('phone').value,
+        IsActive: document.getElementById('status').value === "Active"
+    };
+
+    try {
+        const res = await fetch("http://localhost:5000/api/update-employee", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(emp)
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('statusMsg').textContent = "✅ Employee updated successfully!";
+            document.getElementById('statusMsg').style.color = "green";
+            setTimeout(() => window.location.href = "employee_list.html", 1200);
+        } else {
+            document.getElementById('statusMsg').textContent = data.message || "❌ Update failed!";
+            document.getElementById('statusMsg').style.color = "red";
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById('statusMsg').textContent = "⚠️ Server error while updating.";
+        document.getElementById('statusMsg').style.color = "red";
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Attendance - Admin Dashboard</title>
+<link rel="stylesheet" href="admin_dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>Admin</h2>
+        </div>
+        <ul class="menu">
+          <li class="active" onclick="location.href='admin_dashboard.html'"><i class="fas fa-home"></i> Dashboard</li>
+          <li onclick="location.href='employee_list.html'"><i class="fas fa-users"></i> Employees</li>
+          <li onclick="location.href='department_list.html'"><i class="fas fa-building"></i> Departments</li>
+          <li onclick="location.href='attendance_list.html'"><i class="fas fa-calendar-check"></i> Attendance</li>
+          <li onclick="location.href='shift_list.html'"><i class="fas fa-clock"></i> Work Shifts</li>
+          <li onclick="location.href='schedule_list.html'"><i class="fas fa-calendar-alt"></i> Work Schedule</li>
+          <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
+        </ul>
+    </aside>
+
+
+    <main class="main-content">
+        <header>
+        <h1>Admin Dashboard</h1>
+        <p id="adminName">Welcome, Admin</p>
+        </header>
+
+        <section class="charts">
+        <div class="chart-card">
+            <h3><i class="fas fa-users"></i> Employees</h3>
+            <canvas id="employeesChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-building"></i> Departments</h3>
+            <canvas id="departmentsChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-calendar-check"></i> Attendance Today</h3>
+            <canvas id="attendanceChart"></canvas>
+        </div>
+        </section>
+    </main>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const adminName = sessionStorage.getItem('employeeName');
+  if (adminName) {
+    document.getElementById("adminName").textContent = "Welcome, " + adminName;
+  }
+  loadStats();
+});
+
+async function loadStats() {
+  try {
+    const response = await fetch("http://localhost:5000/api/stats");
+    const data = await response.json();
+
+    const totalEmployees = data.totalEmployees || 0;
+    const totalDepartments = data.totalDepartments || 0;
+    const attendanceToday = data.attendanceToday || 0;
+
+    createDonutChart("employeesChart", totalEmployees, "#2563eb");
+    createDonutChart("departmentsChart", totalDepartments, "#22c55e");
+    createDonutChart("attendanceChart", attendanceToday, "#f59e0b");
+
+  } catch (error) {
+    console.error("Error loading stats:", error);
+  }
+}
+
+function createDonutChart(canvasId, value, color) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Value"],
+      datasets: [{
+        data: [1],
+        backgroundColor: [color],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: "70%",
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+      },
+      animation: { animateRotate: true, duration: 1000 },
+    },
+    plugins: [{
+      id: 'text',
+      beforeDraw(chart) {
+        const { width } = chart;
+        const { ctx } = chart;
+        ctx.restore();
+        const fontSize = (width / 10).toFixed(2);
+        ctx.font = fontSize + "px Segoe UI";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#1e293b";
+        const text = value;
+        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+        const textY = chart.chartArea.height / 1.6;
+        ctx.fillText(text, textX, textY);
+        ctx.save();
+      }
+    }]
+  });
+}
+
+function handleLogout() {
+  sessionStorage.removeItem('employeeName');
+  sessionStorage.removeItem('employeeID');
+  window.location.href = 'login.html';
+}
+</script>
+</body>
+</html>

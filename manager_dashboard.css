@@ -1,0 +1,192 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+
+body {
+    background: radial-gradient(circle, #E0C3FC, #A7C6FF, #F9E7FF);
+}
+
+.header {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    color: #3A3A3A;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(220, 220, 255, 0.4);
+    margin-left: 230px;
+}
+
+.right-controls {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.user-info {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2d3e5e;
+}
+
+.content {
+    margin-left: 220px; 
+    padding: 15px; 
+}
+
+.kpi-container {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 22px;
+}
+
+.kpi-card {
+    background: linear-gradient(135deg, #A7C6FF, #8EA4FF);
+    color: white;
+    border-radius: 18px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0px 5px 15px rgba(130, 150, 255, 0.3);
+    font-size: 18px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.kpi-card span {
+    display: block;
+    margin-top: 12px;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.kpi-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0px 14px 30px rgba(125, 150, 255, 0.4);
+}
+
+.menu-container {
+    margin-top: 45px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.menu-btn {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(5px);
+    border-radius: 16px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(100, 100, 180, 0.18);
+    transition: all 0.25s ease;
+    border: 2px solid transparent;
+}
+
+.menu-btn:hover {
+    transform: translateY(-6px);
+    border-color: #B599FF;
+    box-shadow: 0px 15px 30px rgba(180, 140, 255, 0.4);
+}
+
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    color: #2d3e5e;
+    padding-top: 25px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-right: 2px solid rgba(200, 200, 255, 0.35);
+}
+
+.sidebar h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #2d3e5e;
+    font-size: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-size: 17px;
+    margin: 10px 15px;
+    border-radius: 50px;  /* Bo tròn giống bubble */
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(150, 150, 255, 0.15);
+    text-align: center;
+}
+
+.sidebar ul li:hover {
+    background: linear-gradient(135deg, #B9C9FF, #8AABFF);
+    color: white;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 18px rgba(135, 120, 255, 0.35);
+}
+.sidebar li.active {
+    font-weight: bold;
+    color: #000; /* hoặc màu nổi bật */
+}
+.sidebar li .badge {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+.content canvas#teamChart {
+    max-height: 300px;   
+    width: 100% !important; 
+}
+
+.content {
+    margin-left: 260px;
+    padding: 15px;   
+}
+
+.logout-btn {
+    background: #FF6B81;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.logout-btn:hover {
+    background: #d94d67;
+}
+
+.filter-container {
+    margin-left: 260px;
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

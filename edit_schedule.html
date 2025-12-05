@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Work Schedule</title>
+  <link rel="stylesheet" href="edit_shift.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h2><i class="fa-solid fa-pen-to-square"></i> Edit Work Schedule</h2>
+
+    <form id="editScheduleForm">
+      <div class="form-group">
+        <label for="EmployeeID">Employee ID</label>
+        <input type="text" id="EmployeeID" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="CaName">Shift</label>
+        <select id="CaName" required></select>
+      </div>
+
+      <div class="form-group">
+        <label for="WorkDate">Work Date</label>
+        <input type="date" id="WorkDate" required>
+      </div>
+
+      <div class="buttons">
+        <button type="submit" class="save-btn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button type="button" class="cancel-btn" onclick="window.history.back()"><i class="fa-solid fa-xmark"></i> Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  const params = new URLSearchParams(window.location.search);
+  const empID = params.get("EmployeeID");
+  const caName = params.get("CaName");
+  const workDate = params.get("WorkDate");
+
+  async function loadSchedule() {
+    const [scheduleRes, shiftsRes] = await Promise.all([
+      fetch(`http://localhost:5000/api/schedule/${empID}/${caName}/${workDate}`),
+      fetch("http://localhost:5000/api/calam")
+    ]);
+
+    const schedule = await scheduleRes.json();
+    const shifts = await shiftsRes.json();
+
+    document.getElementById("EmployeeID").value = schedule.EmployeeID;
+    document.getElementById("WorkDate").value = schedule.WorkDate.split("T")[0];
+
+    const shiftSelect = document.getElementById("CaName");
+    shifts.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.CaName;
+      opt.textContent = `${s.CaName}`;
+      if (s.CaName === schedule.CaName) opt.selected = true;
+      shiftSelect.appendChild(opt);
+    });
+  }
+
+  document.getElementById("editScheduleForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const updated = {
+      CaName: document.getElementById("CaName").value,
+      WorkDate: document.getElementById("WorkDate").value
+    };
+
+    const res = await fetch(`http://localhost:5000/api/schedule/${empID}/${caName}/${workDate}`, {
+      method: "PUT",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(updated)
+    });
+
+    if (res.ok) {
+      alert("✅ Schedule updated successfully!");
+      window.location.href = "schedule_list.html";
+    } else {
+      alert("❌ Failed to update schedule!");
+    }
+  });
+
+  loadSchedule();
+  </script>
+</body>
+</html>

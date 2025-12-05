@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Employee Account</title>
+<link rel="stylesheet" href="register_account.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<header class="header">
+    <h1><i class="fa-solid fa-user-plus"></i> Register New Employee</h1>
+    <p>Create a new employee account for the attendance system</p>
+</header>
+
+<main class="form-container">
+    <form id="registerForm">
+        <div class="form-grid">
+            <div class="form-group">
+                <label><i class="fa-solid fa-id-card"></i> Employee ID</label>
+                <input type="number" id="employeeID" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-user"></i> Full Name</label>
+                <input type="text" id="fullName" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-calendar"></i> Date of Birth</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-venus-mars"></i> Gender</label>
+                <select id="gender" required>
+                    <option value="">Select</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-phone"></i> Phone</label>
+                <input type="text" id="phone" placeholder="e.g. 090xxxxxxx">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-location-dot"></i> Address</label>
+                <textarea id="address" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-briefcase"></i> Position</label>
+                <input type="text" id="position" placeholder="Staff, Manager" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fa-solid fa-envelope"></i> Email</label>
+                <input type="email" id="email" placeholder="example@gmail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-building"></i> Department</label>
+                <select id="department" required>
+                    <option value="">-- Select Department --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-lock"></i> Password</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fa-solid fa-user-shield"></i> Role</label>
+                <select id="role" required>
+                    <option value="">Select Role</option>
+                    <option value="Developer">Developer</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Designer">Designer</option>
+                    <option value="Support">Support</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-register">
+                <i class="fa-solid fa-user-plus"></i> Register Account
+            </button>
+        </div>
+    </form>
+</main>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+const dob = document.getElementById('dob').value; 
+// luôn là dạng "2025-08-30"
+
+  const data = {
+    employeeID: document.getElementById('employeeID').value.trim(),
+    fullName: document.getElementById('fullName').value.trim(),
+    dob: document.getElementById('dob').value,
+    gender: document.getElementById('gender').value,
+    phone: document.getElementById('phone').value || null,
+    address: document.getElementById('address').value || null,
+    position: document.getElementById('position').value.trim(),
+        email: document.getElementById('email').value.trim(),
+    department: document.getElementById('department').value.trim(),
+    password: document.getElementById('password').value,
+    role: document.getElementById('role').value
+  };
+
+  try {
+    const res = await fetch('http://localhost:5000/api/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    alert(result.message);
+
+    if (result.success) {
+      // Quay lại login, KHÔNG redirect sang face capture
+        window.location.reload();
+    }
+  } catch (err) {
+    alert("❌ Error connecting to server: " + err.message);
+  }
+});
+
+
+
+//Load Department list from server
+async function loadDepartments() {
+  const res = await fetch('http://localhost:5000/api/departments/dropdown');
+  const data = await res.json();
+
+  const select = document.getElementById('department');
+  select.innerHTML = '<option value="">-- Select Department --</option>';
+
+  if (data.success) {
+    data.departments.forEach(dep => {
+      const option = document.createElement('option');
+      option.value = dep.DepartmentID;
+      option.textContent = dep.DepartmentName;
+      select.appendChild(option);
+    });
+  }
+}
+
+
+// Gọi hàm khi trang load xong
+window.addEventListener("DOMContentLoaded", loadDepartments);
+
+</script>
+
+</body>
+</html>

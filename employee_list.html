@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employees</title>
+<link rel="stylesheet" href="admin_dashboard.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.btn-register {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s ease-in-out;
+}
+.btn-register i { margin-right: 6px; }
+.btn-register:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.filter-section input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.filter-section button {
+    background-color: #046e72;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+.filter-section button:hover { background-color: #0056b3; }
+.action-btn {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    font-size: 13px;
+}
+.edit-btn { background-color: #28a745; }
+.edit-btn:hover { background-color: #218838; }
+.deactivate-btn { background-color: #dc3545; }
+.deactivate-btn:hover { background-color: #c82333; }
+</style>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="logo"><h2>Admin</h2></div>
+        <ul class="menu">
+          <li onclick="location.href='admin_dashboard.html'"><i class="fas fa-home"></i> Dashboard</li>
+          <li class="active" onclick="location.href='employee_list.html'"><i class="fas fa-users"></i> Employees</li>
+          <li onclick="location.href='department_list.html'"><i class="fas fa-building"></i> Departments</li>
+          <li onclick="location.href='attendance_list.html'"><i class="fas fa-calendar-check"></i> Attendance</li>
+          <li onclick="location.href='shift_list.html'"><i class="fas fa-clock"></i> Work Shifts</li>
+          <li onclick="location.href='schedule_list.html'"><i class="fas fa-calendar-alt"></i> Work Schedule</li>
+          <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Employee List</h1>
+            <button class="btn-register" onclick="location.href='register_account.html'">
+                <i class="fas fa-user-plus"></i> Register Account
+            </button>
+        </header>
+
+        <section class="filter-section">
+            <input type="text" id="filterInput" placeholder="Search by Employee ID...">
+            <button onclick="filterEmployees()"><i class="fas fa-search"></i> Search</button>
+        </section>
+
+        <section class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Full Name</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Phone</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTable"></tbody>
+            </table>
+        </section>
+    </main>
+</div>
+
+<script>
+let employeesData = [];
+
+async function loadEmployees() {
+  try {
+    const response = await fetch("http://localhost:5000/api/employees");
+    const data = await response.json();
+    employeesData = data;
+    renderEmployees(employeesData);
+  } catch (error) {
+    console.error("Error loading employees:", error);
+  }
+}
+
+function renderEmployees(data) {
+  const tableBody = document.getElementById("employeeTable");
+  tableBody.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = "<tr><td colspan='6'>No employees found</td></tr>";
+    return;
+  }
+
+  data.forEach(emp => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${emp.EmployeeID}</td>
+      <td>${emp.FullName}</td>
+      <td>${emp.DepartmentName || '-'}</td>
+      <td>${emp.Position || '-'}</td>
+      <td>${emp.Phone || '-'}</td>
+      <td>
+        <button class="action-btn edit-btn" onclick="goToEdit('${emp.EmployeeID}')">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn deactivate-btn" onclick="deactivateEmployee('${emp.EmployeeID}')">
+          <i class="fas fa-ban"></i>
+        </button>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+function filterEmployees() {
+  const keyword = document.getElementById("filterInput").value.trim().toLowerCase();
+  const filtered = employeesData.filter(emp =>
+    emp.EmployeeID.toString().toLowerCase().includes(keyword)
+  );
+  renderEmployees(filtered);
+}
+
+function handleLogout() {
+  sessionStorage.clear();
+  window.location.href = 'login.html';
+}
+
+// === CHUYỂN ĐẾN TRANG EDIT ===
+function goToEdit(id) {
+  window.location.href = `edit_employee.html?id=${id}`;
+}
+
+// === VÔ HIỆU HÓA NHÂN VIÊN ===
+async function deactivateEmployee(id) {
+  if (!confirm("Are you sure you want to deactivate this employee?")) return;
+  try {
+    const res = await fetch(`http://localhost:5000/api/deactivate-employee/${id}`, {
+      method: "PUT"
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Employee deactivated successfully!");
+      loadEmployees();
+    } else {
+      alert(data.message || "Failed to deactivate employee.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error while deactivating employee.");
+  }
+}
+
+loadEmployees();
+</script>
+</body>
+</html>

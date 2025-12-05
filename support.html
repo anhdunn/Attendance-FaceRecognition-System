@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Support • Smart Attendance</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #16305f, #ffcee5); 
+
+      color: #222;
+    }
+
+    .page {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: bold;
+      color: #1c1c1c;
+    }
+
+    .content {
+      padding: 20px;
+      flex: 1;
+    }
+
+    /* Cards */
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      margin-bottom: 25px;
+    }
+    .card h3 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 80%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      background: #ffffff;
+    }
+
+    .form-group textarea {
+      height: 110px;
+      resize: none;
+    }
+
+    /* Beautiful gradient button */
+    .btn {
+      background: linear-gradient(135deg, #42a5f5, #4776e6);
+      color: #fff;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    /* FAQ Accordion */
+    .faq-item {
+      border-bottom: 1px solid #ddd;
+      padding: 10px 0;
+      cursor: pointer;
+    }
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+    .faq-answer {
+      display: none;
+      padding-top: 8px;
+      color: #444;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <h1>Support</h1>
+      <button onclick="location.href='account.html'" style="border:none;background:none;font-size:22px;color:#333;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </header>
+
+    <main class="content">
+
+      <!-- CONTACT FORM -->
+      <section class="card">
+        <h3><i class="fa-solid fa-envelope"></i> Contact Support</h3>
+
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" id="titleInput" placeholder="Example: Face recognition not working">
+        </div>
+
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="priorityInput">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High (Urgent)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="descInput" placeholder="Please describe your issue in detail..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Attachment (optional)</label>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <button class="btn" onclick="sendSupport()">Submit Request</button>
+      </section>
+
+      <!-- FAQ -->
+      <section class="card">
+        <h3><i class="fa-solid fa-circle-question"></i> FAQ – Frequently Asked Questions</h3>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>❓ The system cannot detect my face. What should I do?</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Ensure there is enough lighting, face the camera directly, and check webcam permissions. If the issue persists, please contact support.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>❓ My working hours are incorrect.</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Please contact your manager to adjust your time record or submit a support request.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+          <div class="faq-question">
+            <span>❓ I cannot log in.</span>
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Check your password, wait for 5 minutes, or use the "Forgot Password" option.
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-question">
+            <span>❓ I checked in but the system did not record my attendance.</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            Make sure your internet connection is stable. If the issue continues, report it with your check-in time so support can verify.
+        </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-question">
+            <span>❓ Why does the camera not turn on?</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            Ensure your browser has granted camera permissions. Restart your browser or try using Chrome/Edge for best compatibility.
+        </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-question">
+            <span>❓ My face recognition accuracy is low. How to improve?</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            Try re-registering your face with good lighting, no mask, and ensure your face is centered. Avoid backlighting or shadows.
+        </div>
+        </div>
+
+
+
+      </section>
+
+      <!-- CONTACT INFO -->
+      <section class="card">
+        <h3><i class="fa-solid fa-headset"></i> Support Information</h3>
+        <p><b>Email:</b> support@smartattendance.com</p>
+        <p><b>Hotline:</b> 0123 456 789</p>
+        <p><b>Working Hours:</b> 08:00 – 17:00 (Mon – Fri)</p>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    // FAQ Toggle
+    function toggleFAQ(el) {
+      const answer = el.querySelector(".faq-answer");
+      const icon = el.querySelector("i");
+
+      if (answer.style.display === "block") {
+        answer.style.display = "none";
+        icon.style.transform = "rotate(0deg)";
+      } else {
+        answer.style.display = "block";
+        icon.style.transform = "rotate(180deg)";
+      }
+    }
+
+    // Support submit (demo)
+    function sendSupport() {
+      alert("🎉 Your support request has been submitted!\nWe will get back to you shortly.");
+    }
+  </script>
+</body>
+</html>

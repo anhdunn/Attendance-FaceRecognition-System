@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Trạng Thái Chấm Công</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0f0f23;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: #1a1a33;
+            padding: 32px 28px;
+            border-radius: 18px;
+            border: 1px solid #2a2a47;
+            box-shadow: 0 0 18px rgba(0,0,0,0.35);
+            animation: popIn .35s ease;
+        }
+
+        @keyframes popIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 {
+            text-align: center;
+            color: #4da6ff;
+            margin-bottom: 22px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .info {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 15px;
+            opacity: 0.8;
+        }
+
+        .status-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            opacity: 0.92;
+        }
+
+        .status-box {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .success {
+            background: rgba(0,255,150,0.10);
+            border-left: 6px solid #00d68f;
+            color: #00f2a0;
+        }
+
+        .fail {
+            background: rgba(255,60,80,0.10);
+            border-left: 6px solid #ff4d4d;
+            color: #ff8080;
+        }
+
+        #loading {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            opacity: 0.7;
+        }
+
+        .btn-back {
+            width: 100%;
+            padding: 13px;
+            margin-top: 26px;
+            background: #4da6ff;
+            color: #fff;
+            font-size: 17px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #1f8bff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Trạng Thái Chấm Công</h2>
+
+    <div class="info">
+        ID Nhân viên: <b id="emp_id">--</b><br>
+        Ngày làm việc gần nhất: <b id="work_date">--</b>
+    </div>
+
+    <div id="loading">🔄 Đang tải dữ liệu...</div>
+
+    <div class="status-title">Check-in:</div>
+    <div id="checkInBox" class="status-box"></div>
+
+    <div class="status-title">Check-out:</div>
+    <div id="checkOutBox" class="status-box"></div>
+
+    <button class="btn-back" onclick="window.location.href='/mainform.html'">
+        ← Quay lại trang chính
+    </button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const employeeID = sessionStorage.getItem("employeeID");
+
+    if (!employeeID) {
+        alert("Không tìm thấy ID nhân viên. Vui lòng đăng nhập lại.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    document.getElementById("emp_id").textContent = employeeID;
+
+    try {
+        const res = await fetch(`/api/attendance-status?employeeID=${employeeID}`);
+        const data = await res.json();
+
+        if (!data.success || !data.data || data.data.length === 0) {
+            document.getElementById("loading").textContent = "❌ Chưa có dữ liệu chấm công.";
+            return;
+        }
+
+        document.getElementById("loading").style.display = "none";
+
+        const latest = data.data[0];
+
+        // Cập nhật ngày làm việc
+        document.getElementById("work_date").textContent = latest.WorkDate || "--";
+
+        const checkInBox = document.getElementById("checkInBox");
+        const checkOutBox = document.getElementById("checkOutBox");
+
+        // Check-in
+        if (latest.CheckIn) {
+            checkInBox.textContent = latest.CheckIn;
+            checkInBox.classList.add("success");
+        } else {
+            checkInBox.textContent = "Chưa check-in";
+            checkInBox.classList.add("fail");
+        }
+
+        // Check-out
+        if (latest.CheckOut) {
+            checkOutBox.textContent = latest.CheckOut;
+            checkOutBox.classList.add("success");
+        } else {
+            checkOutBox.textContent = "Chưa check-out";
+            checkOutBox.classList.add("fail");
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Lỗi tải dữ liệu chấm công!");
+    }
+});
+</script>
+
+</body>
+</html>

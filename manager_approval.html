@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manager Approval • Manager Dashboard</title>
+<link rel="stylesheet" href="manager_dashboard.css">
+<style>
+  body { 
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle, #E0C3FC, #A7C6FF, #F9E7FF);
+    color: #333; 
+  }
+.header {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    color: #3A3A3A;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(220, 220, 255, 0.4);
+    margin-left: 230px;
+}
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    color: #2d3e5e;
+    padding-top: 25px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-right: 2px solid rgba(200, 200, 255, 0.35);
+}  
+.sidebar h3 { margin-bottom: 12px; color: #2d3e5e;}
+.sidebar ul { list-style: none; padding-left: 0; }
+.sidebar li { 
+    padding: 8px 12px; 
+    cursor: pointer; 
+    color: #555; 
+    transition: 0.2s; 
+    position: relative; 
+}
+.sidebar li .badge {
+    position: absolute;
+    top: 5px;
+    right: 12px;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+.sidebar li:hover { color: #000; font-weight: bold; }
+.sidebar li.active {
+    font-weight: bold;
+    color: #000; 
+}
+
+.content { margin-left: 240px; padding: 20px; }
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 20px; 
+    background: #fff; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+th { background: #f5f5f5; }
+button.approve, button.reject { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
+button.approve { background: #4CAF50; color: white; }
+button.reject { background: #f44336; color: white; }
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    position: relative;
+}
+.modal .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="page-title">Leave Requests Approval</div>
+  <div class="right-controls">
+    <span class="user-info">Welcome, <span id="welcomeName"></span></span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="sidebar">
+    <h3>Manager Dashboard</h3>
+    <ul>
+        <li id="main" onclick="navigate('manager_dashboard.html', this)">Manager Dashboard</li>
+        <li id="menu-approval" onclick="navigate('manager_approval.html', this)">Approval Requests</li>
+        <li id="menu-attendance" onclick="navigate('view_team_attendance.html', this)">Team Attendance</li>
+        <li id="menu-kpi" onclick="navigate('team_kpi.html', this)">Performance & KPI</li>
+        <li id="menu-members" onclick="navigate('team_members.html', this)">Team Members</li>
+    </ul>
+</div>
+
+<div class="content">
+    <h2>Pending Leave Requests</h2>
+    <div id="requestsContainer">Loading...</div>
+</div>
+
+<!-- Modal -->
+<div id="requestModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h3>Leave Request Details</h3>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+/* ===== Sidebar Active & Navigation ===== */
+function navigate(url, element) {
+    document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+    element.classList.add('active');
+    location.href = url;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const path = location.pathname.split("/").pop();
+    const menuMap = {
+        "manager_dashboard.html" : "main",
+        "manager_approval.html": "menu-approval",
+        "view_team_attendance.html": "menu-attendance",
+        "team_kpi.html": "menu-kpi",
+        "team_members.html": "menu-members"
+    };
+    const activeId = menuMap[path];
+    if (activeId) document.getElementById(activeId)?.classList.add('active');
+});
+
+/* ===== Session & Logout ===== */
+document.addEventListener("DOMContentLoaded", () => {
+    const employeeName = sessionStorage.getItem("employeeName");
+    const employeeRole = sessionStorage.getItem("employeeRole");
+    const employeeID = sessionStorage.getItem("employeeID");
+
+    if (!employeeName || employeeRole !== "Manager" || !employeeID) {
+        location.href = "login.html";
+        return;
+    }
+    document.getElementById("welcomeName").textContent = employeeName;
+    loadLeaveRequests();
+});
+
+function logout() {
+    sessionStorage.clear();
+    location.href = "login.html";
+}
+
+/* ===== Badge Notification ===== */
+async function checkNewRequests() {
+    try {
+        const res = await fetch("http://localhost:5000/api/leave-requests-list");
+        const requests = await res.json();
+        const approvalMenu = document.getElementById("menu-approval");
+
+        approvalMenu.querySelector(".badge")?.remove();
+
+        if (requests.length > 0) {
+            const badge = document.createElement("span");
+            badge.classList.add("badge");
+            badge.textContent = requests.length;
+            approvalMenu.appendChild(badge);
+        }
+    } catch (err) { console.error("Failed to check new requests", err); }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    checkNewRequests();
+    setInterval(checkNewRequests, 30000);
+});
+
+/* ===== Load Leave Requests Table ===== */
+async function loadLeaveRequests() {
+    const container = document.getElementById("requestsContainer");
+    container.innerHTML = "Loading...";
+
+    try {
+        const res = await fetch("http://localhost:5000/api/leave-requests-list");
+        const requests = await res.json();
+
+        if (!requests.length) {
+            container.innerHTML = "No pending leave requests.";
+            return;
+        }
+
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Reason</th>
+                    <th>Request Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        requests.forEach((r, i) => {
+            const startDate = new Date(r.StartDate).toLocaleDateString();
+            const endDate = new Date(r.EndTime).toLocaleDateString();
+            const requestDate = new Date(r.RequestDate).toLocaleDateString();
+            html += `<tr onclick="showRequestDetails(${r.LeaveRequestID})">
+                <td>${i+1}</td>
+                <td>${r.EmployeeName}</td>
+                <td>${r.LeaveType}</td>
+                <td>${startDate}</td>
+                <td>${endDate}</td>
+                <td>${r.Reason}</td>
+                <td>${requestDate}</td>
+                <td>
+                    <button class="approve" onclick="handleApproval(event, ${r.LeaveRequestID}, 'Approved')">Approve</button>
+                    <button class="reject" onclick="handleApproval(event, ${r.LeaveRequestID}, 'Rejected')">Reject</button>
+                </td>
+            </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+
+    } catch (err) {
+        container.innerHTML = "Failed to load leave requests.";
+        console.error(err);
+    }
+}
+
+/* ===== Modal Details ===== */
+function showRequestDetails(leaveRequestID) {
+    fetch(`http://localhost:5000/api/leave-requests-list`)
+        .then(res => res.json())
+        .then(requests => {
+            const req = requests.find(r => r.LeaveRequestID === leaveRequestID);
+            if (!req) return;
+            const modalBody = document.getElementById("modalBody");
+            modalBody.innerHTML = `
+                <h4>Employee Information</h4>
+                <p><strong>Name:</strong> ${req.EmployeeName}</p>
+                <p><strong>ID:</strong> ${req.EmployeeID}</p>
+                <hr>
+                <h4>Leave Request Details</h4>
+                <p><strong>Type:</strong> ${req.LeaveType}</p>
+                <p><strong>Start Date:</strong> ${new Date(req.StartDate).toLocaleDateString()}</p>
+                <p><strong>End Date:</strong> ${new Date(req.EndTime).toLocaleDateString()}</p>
+                <p><strong>Reason:</strong> ${req.Reason}</p>
+                <p><strong>Request Date:</strong> ${new Date(req.RequestDate).toLocaleDateString()}</p>
+            `;
+            document.getElementById("requestModal").style.display = "block";
+        });
+}
+
+
+function closeModal() {
+    document.getElementById("requestModal").style.display = "none";
+}
+
+// Đóng modal khi click ngoài
+window.onclick = function(event) {
+    const modal = document.getElementById("requestModal");
+    if (event.target === modal) closeModal();
+}
+
+/* ===== Handle Approval ===== */
+function handleApproval(event, leaveRequestID, status) {
+    event.stopPropagation(); // tránh click row
+    const approvedBy = sessionStorage.getItem("employeeID");
+    if (!approvedBy) { alert("EmployeeID not found"); return; }
+
+    fetch("http://localhost:5000/api/approve-leave", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ LeaveRequestID: leaveRequestID, Status: status, ApprovedBy: approvedBy })
+    }).then(res => res.json())
+      .then(data => {
+        if (data.success) {
+            alert(`Request ${status.toLowerCase()} successfully!`);
+            loadLeaveRequests();
+        } else alert("Failed to update request");
+      }).catch(err => { console.error(err); alert("Error updating request"); });
+}
+</script>
+
+</body>
+</html>

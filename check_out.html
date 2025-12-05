@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Check-out</title>
+  <link rel="stylesheet" href="check_in.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="iphone">
+  <div class="screen">
+    <header class="header">
+      <h2>Face Check-out</h2>
+    </header>
+
+    <main class="checkin-section">
+      <div class="camera-frame">
+        <video id="camera" autoplay playsinline muted></video>
+        <div class="scan-line"></div>
+      </div>
+
+      <p class="current-time" id="currentTime">--:--:--</p>
+
+      <!-- Nút Scan khuôn mặt -->
+      <button class="checkin-btn" id="checkoutBtn">Scan & Check Out</button>
+
+      <!-- Nút Check-out bằng mật khẩu -->
+      <button class="checkin-btn password-btn" id="pwCheckoutBtn" style="background:#4a4a4a;margin-top:10px;">
+        Check Out bằng mật khẩu
+      </button>
+
+      <p class="success-msg" id="successMsg"></p>
+    </main>
+
+    <nav class="navbar">
+      <button onclick="location.href='mainform.html'"><i class="fa-solid fa-house"></i></button>
+      <button onclick="location.href='apply_form.html'"><i class="fa-regular fa-file-lines"></i></button>
+      <button onclick="location.href='time_sheet.html'"><i class="fa-regular fa-clock"></i></button>
+      <button onclick="location.href='account.html'"><i class="fa-regular fa-user"></i></button>
+    </nav>
+  </div>
+</div>
+
+
+<!-- ============================ -->
+<!-- Modal nhập mật khẩu -->
+<!-- ============================ -->
+<div id="pwModal" class="pw-modal" style="
+  display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(3px); display:flex; justify-content:center; align-items:center;
+">
+  <div style="
+    background:#fff; padding:20px; border-radius:15px; width:85%; max-width:350px; text-align:center;
+  ">
+    <h3>Nhập mật khẩu</h3>
+    <input type="password" id="pwInput" placeholder="Password" style="
+      width:100%; padding:10px; margin-top:10px; font-size:16px; border-radius:10px; border:1px solid #aaa;
+    ">
+    <div style="margin-top:15px; display:flex; gap:10px;">
+      <button id="confirmPwBtn" style="
+        flex:1; padding:10px; background:#0099ff; color:#fff; border:none; border-radius:10px;
+      ">Xác nhận</button>
+      <button id="closePwBtn" style="
+        flex:1; padding:10px; background:#aaa; color:#000; border:none; border-radius:10px;
+      ">Hủy</button>
+    </div>
+  </div>
+</div>
+
+
+<script defer src="face-api.min.js"></script>
+<script defer src="check_out.js"></script>
+
+<script>
+// =============================
+// Hiển thị modal nhập password
+// =============================
+document.getElementById("pwCheckoutBtn").addEventListener("click", () => {
+  document.getElementById("pwModal").style.display = "flex";
+});
+
+// Đóng modal
+document.getElementById("closePwBtn").addEventListener("click", () => {
+  document.getElementById("pwModal").style.display = "none";
+});
+
+// =============================
+// Xác nhận check-out bằng password
+// =============================
+document.getElementById("confirmPwBtn").addEventListener("click", async () => {
+  const password = document.getElementById("pwInput").value.trim();
+  const employeeID = sessionStorage.getItem("employeeID");
+
+  if (!password) {
+    alert("Vui lòng nhập mật khẩu!");
+    return;
+  }
+
+  const res = await fetch("http://localhost:5000/api/checkout-pw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ employeeID, password })
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    document.getElementById("successMsg").textContent = "✅ Check-out thành công!";
+    document.getElementById("successMsg").style.color = "lime";
+  } else {
+    document.getElementById("successMsg").textContent = data.message;
+    document.getElementById("successMsg").style.color = "red";
+  }
+
+  document.getElementById("successMsg").classList.add("show");
+  setTimeout(() => {
+    document.getElementById("successMsg").classList.remove("show");
+  }, 3500);
+
+  document.getElementById("pwModal").style.display = "none";
+  document.getElementById("pwInput").value = "";
+});
+</script>
+
+</body>
+</html>

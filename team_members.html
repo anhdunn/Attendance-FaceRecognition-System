@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Members • Manager Dashboard</title>
+<link rel="stylesheet" href="manager_dashboard.css">
+<style>
+  body { font-family: Arial, sans-serif;background: radial-gradient(circle, #E0C3FC, #A7C6FF, #F9E7FF);
+ color: #333; }
+.header {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
+    color: #3A3A3A;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(220, 220, 255, 0.4);
+    margin-left: 230px;
+}
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    color: #2d3e5e;
+    padding-top: 25px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-right: 2px solid rgba(200, 200, 255, 0.35);
+}  
+.sidebar h3 { margin-bottom: 12px; color: #2d3e5e;}
+.sidebar ul {
+    list-style: none;
+}
+.sidebar li.active {
+    font-weight: bold;
+    color: #000; /* hoặc màu nổi bật */
+}
+.right-controls {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.logout-btn {
+    background: #FF6B81;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.logout-btn:hover {
+    background: #d94d67;
+}
+  .sidebar li { padding: 8px 0; cursor: pointer; color: #555; transition: 0.2s; }
+  .sidebar li .badge {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+  .sidebar li:hover { color: #000; font-weight: bold; }
+  .content { margin-left: 240px; padding: 20px; }
+  #searchInput { padding: 8px 12px; width: 100%; max-width: 400px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ccc; }
+  .position-group { margin-bottom: 24px; background: #f0f0f0; border-radius: 8px; padding: 10px; }
+  .position-group h3 { margin: 0 0 10px 0; color: #333; font-size: 1.1rem; }
+  .employee-list { list-style: none; padding: 0; margin: 0; }
+  .employee-list li { padding: 6px 10px; border-bottom: 1px solid #ddd; color: #555; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="page-title">Team Members</div>
+  <div class="right-controls">
+    <span class="user-info">Welcome, <span id="welcomeName"></span></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="sidebar">
+    <h3>Manager Dashboard</h3>
+    <ul>
+        <li id="main" onclick="navigate('manager_dashboard.html', this)">Manager Dashboard</li>
+        <li id="menu-approval" onclick="navigate('manager_approval.html', this)">Approval Requests</li>
+        <li id="menu-attendance" onclick="navigate('view_team_attendance.html', this)">Team Attendance</li>
+        <li id="menu-kpi" onclick="navigate('team_kpi.html', this)">Performance & KPI</li>
+        <li id="menu-members" onclick="navigate('team_members.html', this)">Team Members</li>
+    </ul>
+</div>
+
+<div class="content">
+    <input type="text" id="searchInput" placeholder="Search by name, position or department...">
+    <div id="teamContainer">Loading...</div>
+</div>
+<script>
+        async function checkNewRequests() {
+    try {
+        const res = await fetch("http://localhost:5000/api/leave-requests-list");
+        const requests = await res.json();
+
+        const approvalMenu = document.getElementById("menu-approval");
+
+        // Xóa badge cũ
+        const oldBadge = approvalMenu.querySelector(".badge");
+        if (oldBadge) oldBadge.remove();
+
+        if (requests.length > 0) {
+            // Thêm badge
+            const badge = document.createElement("span");
+            badge.classList.add("badge");
+            badge.textContent = requests.length; // số request mới
+            approvalMenu.appendChild(badge);
+        }
+    } catch (err) {
+        console.error("Failed to check new requests", err);
+    }
+}
+
+    // Check ngay khi load
+    document.addEventListener("DOMContentLoaded", () => {
+        checkNewRequests();
+        // Check định kỳ mỗi 30 giây
+        setInterval(checkNewRequests, 30000);
+    });
+
+    function navigate(url, element) {
+    // Xóa class active của các li khác
+    document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
+
+    // Thêm class active cho li vừa click
+    element.classList.add('active');
+
+    // Chuyển trang
+    location.href = url;
+}
+
+// ✅ Tự động đánh dấu menu theo trang hiện tại khi load
+document.addEventListener("DOMContentLoaded", () => {
+    const path = location.pathname.split("/").pop(); // lấy file html hiện tại
+    const menuMap = {
+        "manager_dashboard.html" : "main",
+        "manager_approval.html": "menu-approval",
+        "view_team_attendance.html": "menu-attendance",
+        "team_kpi.html": "menu-kpi",
+        "team_members.html": "menu-members"
+    };
+
+    const activeId = menuMap[path];
+    if (activeId) {
+        const el = document.getElementById(activeId);
+        if (el) el.classList.add('active');
+    }
+});
+
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const employeeName = sessionStorage.getItem("employeeName");
+    const employeeRole = sessionStorage.getItem("employeeRole");
+
+    if (!employeeName || employeeRole !== "Manager") {
+        location.href = "login.html";
+        return;
+    }
+    document.getElementById("welcomeName").textContent = employeeName;
+
+    loadTeamMembers();
+
+    document.getElementById("searchInput").addEventListener("input", e => {
+        const keyword = e.target.value.toLowerCase();
+        document.querySelectorAll(".position-group").forEach(group => {
+            let visible = false;
+            group.querySelectorAll("li").forEach(li => {
+                if (li.textContent.toLowerCase().includes(keyword)) {
+                    li.style.display = "block";
+                    visible = true;
+                } else li.style.display = "none";
+            });
+            group.style.display = visible ? "block" : "none";
+        });
+    });
+});
+
+function logout() {
+    sessionStorage.clear();
+    location.href = "login.html";
+}
+
+async function loadTeamMembers() {
+    const container = document.getElementById("teamContainer");
+    container.innerHTML = "Loading...";
+
+    try {
+        const response = await fetch("http://localhost:5000/api/team-members");
+        const employees = await response.json();
+
+        if (!employees.length) {
+            container.innerHTML = "No employees found.";
+            return;
+        }
+
+        const grouped = employees.reduce((acc, emp) => {
+            if (!acc[emp.Position]) acc[emp.Position] = [];
+            acc[emp.Position].push(emp);
+            return acc;
+        }, {});
+
+        container.innerHTML = "";
+
+        for (const position in grouped) {
+            const groupDiv = document.createElement("div");
+            groupDiv.className = "position-group";
+
+            const title = document.createElement("h3");
+            title.textContent = position;
+            groupDiv.appendChild(title);
+
+            const ul = document.createElement("ul");
+            ul.className = "employee-list";
+
+            grouped[position].forEach(emp => {
+                const li = document.createElement("li");
+                li.textContent = `${emp.FullName} | ${emp.DepartmentName} | ${emp.Phone || '-'}`;
+                ul.appendChild(li);
+            });
+
+            groupDiv.appendChild(ul);
+            container.appendChild(groupDiv);
+        }
+
+    } catch (err) {
+        container.innerHTML = "Failed to load data.";
+        console.error(err);
+    }
+}
+</script>
+
+</body>
+</html>

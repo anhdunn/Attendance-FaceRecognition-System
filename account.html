@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Account • Smart Attendance</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Your stylesheet -->
+  <link rel="stylesheet" href="account.css">
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <h1></h1>
+      </div>
+      <div class="actions">
+        <button id="logoutBtn" class="btn btn-ghost"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="profile-card">
+        <div class="avatar-wrap">
+          <img id="avatarImg" src="avatar-placeholder.png" alt="avatar" />
+        </div>
+        <div class="profile-info">
+          <h2 id="accountName">—</h2>
+          <p class="muted" id="accountRole">—</p>
+          <p class="muted small" id="accountID">ID: —</p>
+        </div>
+
+      </section>
+
+      <section class="settings">
+        <h3>Account settings</h3>
+        <ul class="settings-list">
+          <li onclick="location.href='profile.html'">
+            <span class="icon"><i class="fa-regular fa-user"></i></span>
+            <div class="text">
+              <div class="title">Profile</div>
+              <div class="subtitle">View or edit profile info</div>
+            </div>
+            <span class="arrow"><i class="fa-solid fa-chevron-right"></i></span>
+          </li>
+
+          <li id="managerBtn" onclick="location.href='manager_dashboard.html'">
+            <span class="icon"><i class="fa-solid fa-user-shield"></i></span>
+            <div class="text">
+              <div class="title">Manager</div>
+              <div class="subtitle">Manage & Monitor Employees</div>
+            </div>
+            <span class="arrow"><i class="fa-solid fa-chevron-right"></i></span>
+          </li>
+
+
+          <li onclick="location.href='change_password.html'">
+            <span class="icon"><i class="fa-solid fa-lock"></i></span>
+            <div class="text">
+              <div class="title">Change password</div>
+              <div class="subtitle">Update account password</div>
+            </div>
+            <span class="arrow"><i class="fa-solid fa-chevron-right"></i></span>
+          </li>
+
+          <li onclick="location.href='support.html'">
+            <span class="icon"><i class="fa-solid fa-circle-question"></i></span>
+            <div class="text">
+              <div class="title">Support</div>
+              <div class="subtitle">Contact support / feedback</div>
+            </div>
+            <span class="arrow"><i class="fa-solid fa-chevron-right"></i></span>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button onclick="location.href='mainform.html'"><i class="fa-solid fa-house"></i></button>
+      <button onclick="location.href='apply_form.html'"><i class="fa-regular fa-file-lines"></i></button>
+      <button onclick="location.href='time_sheet.html'"><i class="fa-regular fa-clock"></i></button>
+      <button class="active" onclick="location.href='account.html'"><i class="fa-regular fa-user"></i></button>
+    </nav>
+  </div>
+
+  <script>
+    (function () {
+  const name = sessionStorage.getItem('employeeName');
+  const role = sessionStorage.getItem('employeeRole');
+  const id = sessionStorage.getItem('employeeID');
+
+  if (!id) {
+    location.href = 'login.html';
+    return;
+  }
+
+  document.getElementById('accountName').textContent = name || 'No name';
+  document.getElementById('accountRole').textContent = role || 'Employee';
+  document.getElementById('accountID').textContent = 'ID: ' + id;
+
+  const avatar = sessionStorage.getItem('employeeAvatar');
+  if (avatar) {
+    document.getElementById('avatarImg').src = avatar;
+  }
+
+  // Logout button
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn.addEventListener('click', () => {
+    sessionStorage.clear();
+    location.href = 'login.html';
+  });
+
+  // Ẩn/hiện nút Manager
+  const managerBtn = document.getElementById('managerBtn');
+  if (role !== 'Manager') {
+    managerBtn.style.display = 'none';
+  }
+})();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Shift - Smart Attendance</title>
+<link rel="stylesheet" href="add_shift.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<style>
+    body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.form-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  width: 400px;
+}
+
+h2 {
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.save-btn, .cancel-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.save-btn {
+  background-color: #2563eb;
+  margin-right: 10px;
+}
+
+.cancel-btn {
+  background-color: #dc2626;
+}
+
+.save-btn:hover { background-color: #1d4ed8; }
+.cancel-btn:hover { background-color: #b91c1c; }
+</style>
+</head>
+<body>
+<div class="form-container">
+  <h2><i class="fas fa-clock"></i> Add New Shift</h2>
+
+  <form id="shiftForm">
+  <label>Ca Name:</label>
+  <input type="text" id="CaName" required placeholder="e.g. CaSáng">
+
+  <label>Start Time:</label>
+  <input type="time" id="StartTime" required>
+
+  <label>End Time:</label>
+  <input type="time" id="EndTime" required>
+
+  <div class="buttons">
+    <button type="submit" class="save-btn">Save</button>
+    <button type="button" class="cancel-btn" onclick="window.location.href='shift_list.html'">Cancel</button>
+  </div>
+</form>
+</div>
+
+<script>
+document.getElementById("shiftForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const CaName = document.getElementById("CaName").value.trim();
+  const StartTime = document.getElementById("StartTime").value;
+  const EndTime = document.getElementById("EndTime").value;
+
+  const response = await fetch("http://localhost:5000/api/calam", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ CaName, StartTime, EndTime })
+  });
+
+  if (response.ok) {
+    alert("Added successfully!");
+    window.location.href = "shift_list.html";
+  } else {
+    alert("Failed to add shift!");
+  }
+});
+</script>
+</body>
+</html>

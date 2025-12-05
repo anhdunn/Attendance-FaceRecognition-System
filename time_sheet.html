@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Sheet</title>
+<link rel="stylesheet" href="time_sheet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="header-section">
+    <img src="avatar.png" alt="Avatar" class="avatar">
+    <div class="employee-info">
+        <h3 id="employeeName"></h3>
+        <p id="employeeRole"></p>
+        <p id="employeeID"></p>
+    </div>
+</div>
+
+<div class="stats-section">
+    <div class="stat-box">
+        <i class="fa-solid fa-calendar-check"></i>
+        <p class="summary-value" id="totalDays">0</p>
+        <p class="summary-title">Total Days</p>
+    </div>
+    <div class="stat-box">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <p class="summary-value" id="lateDays">0</p>
+        <p class="summary-title">Late Days</p>
+    </div>
+    <div class="stat-box">
+        <i class="fa-solid fa-clock"></i>
+        <p class="summary-value" id="totalHours">0</p>
+        <p class="summary-title">Total Hours</p>
+    </div>
+</div>
+
+<div class="calendar-wrapper">
+    <div class="calendar-header">
+        <h3>Time Sheet</h3>
+        <select id="monthSelect"></select>
+    </div>
+
+    <div id="calendar"></div>
+
+    <div class="calendar-legend">
+    <div class="legend-item">
+        <div class="color-box present"></div>
+        <span>On Time</span>
+    </div>
+    <div class="legend-item">
+        <div class="color-box late"></div>
+        <span>Late</span>
+    </div>
+    <div class="legend-item">
+        <div class="color-box absent"></div>
+        <span>Absent</span>
+    </div>
+    <div class="legend-item">
+        <div class="color-box today"></div>
+        <span>Today</span>
+    </div>
+    </div>
+
+</div>
+
+<!-- Popup detail -->
+<div id="dayDetail" class="day-detail-popup" style="display:none;">
+    <p><strong>Date:</strong> <span id="detailDate"></span></p>
+    <p><strong>Check In:</strong> <span id="detailCheckIn"></span></p>
+    <p><strong>Check Out:</strong> <span id="detailCheckOut"></span></p>
+    <p><strong>Hours:</strong> <span id="detailHours"></span></p>
+    <button onclick="closeDetail()">Close</button>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="navbar">
+    <a href="mainform.html"><button><i class="fa-solid fa-house"></i></button></a>
+    <a href="apply_form.html"><button><i class="fa-regular fa-file-lines"></i></button></a>
+    <a href="time_sheet.html"><button class="active"><i class="fa-regular fa-clock"></i></button></a>
+    <a href="account.html"><button><i class="fa-regular fa-user"></i></button></a>
+</nav>
+
+<script>
+// ========== LẤY INFO NHÂN VIÊN ==========
+const employeeID = sessionStorage.getItem("employeeID");
+const employeeName = sessionStorage.getItem("employeeName");
+const employeeRole = sessionStorage.getItem("employeeRole");
+
+if (!employeeID || !employeeName) {
+    location.href = "login.html";
+}
+
+document.getElementById("employeeName").textContent = employeeName;
+document.getElementById("employeeID").textContent = `ID: ${employeeID}`;
+document.getElementById("employeeRole").textContent = employeeRole;
+
+// ========== LOAD TIME SHEET TỪ API ==========
+let timeSheetData = [];
+
+async function loadTimesheet() {
+    try {
+        const res = await fetch(`http://localhost:5000/api/timesheet/${employeeID}`);
+        timeSheetData = await res.json();
+
+        renderSummary();
+        renderMonth(Number(monthSelect.value));
+
+    } catch (err) {
+        console.error("❌ Lỗi load Time Sheet:", err);
+    }
+}
+
+// ========== TÍNH TỔNG KẾT ==========
+function renderSummary() {
+    document.getElementById("totalDays").textContent = timeSheetData.length;
+
+    document.getElementById("lateDays").textContent = timeSheetData.filter(d => {
+        const [h, m] = d.checkIn.split(":").map(Number);
+        return h > 8 || (h === 8 && m > 0);
+    }).length;
+
+    let totalHours = 0;
+    timeSheetData.forEach(d => {
+        const [inH, inM] = d.checkIn.split(":").map(Number);
+        const [outH, outM] = d.checkOut.split(":").map(Number);
+        totalHours += (outH + outM / 60) - (inH + inM / 60);
+    });
+
+    document.getElementById("totalHours").textContent = totalHours.toFixed(1);
+}
+
+// ========== CALENDAR ==========
+    const calendar = document.getElementById("calendar");
+    const monthSelect = document.getElementById("monthSelect");
+    const year = new Date().getFullYear();
+
+    for (let m = 1; m <= 12; m++) {
+      const opt = document.createElement("option");
+      opt.value = m;
+    opt.textContent = new Date(year, m - 1).toLocaleString("en-US", { month: "long" });
+      monthSelect.appendChild(opt);
+    }
+
+ monthSelect.value = new Date().getMonth() + 1;
+
+    // Lắng nghe khi đổi tháng
+    monthSelect.addEventListener("change", () => {
+      renderMonth(Number(monthSelect.value));
+    });
+
+    //hàm render lịch
+function renderMonth(month) {
+      console.log("🔹 Rendering month:", month);
+      calendar.innerHTML = "";
+
+      const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      daysOfWeek.forEach(day => {
+        const div = document.createElement("div");
+        div.textContent = day;
+        div.classList.add("day", "header");
+        calendar.appendChild(div);
+      });
+      
+    const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+
+      console.log("➡️ firstDay:", firstDay, "daysInMonth:", daysInMonth);
+
+      // Thêm ô trống trước ngày đầu tháng
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDiv = document.createElement("div");
+        calendar.appendChild(emptyDiv);
+      }
+
+      // Thêm các ngày
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.textContent = d;
+        dayDiv.classList.add("day");
+          const today = new Date();
+  if (today.getFullYear() === year && today.getMonth() + 1 === month && today.getDate() === d) {
+    dayDiv.classList.add("today");
+  }
+        calendar.appendChild(dayDiv);
+      }
+    }
+
+    // ✅ Gọi sau khi danh sách tháng đã sẵn sàng
+    renderMonth(Number(monthSelect.value));
+
+// ========== SHOW DETAIL POPUP ==========
+function showDetail(d) {
+    document.getElementById("detailDate").textContent = d.date;
+    document.getElementById("detailCheckIn").textContent = d.checkIn;
+    document.getElementById("detailCheckOut").textContent = d.checkOut;
+
+    const [inH, inM] = d.checkIn.split(":").map(Number);
+    const [outH, outM] = d.checkOut.split(":").map(Number);
+    document.getElementById("detailHours").textContent = ((outH + outM / 60) - (inH + inM / 60)).toFixed(1);
+
+    document.getElementById("dayDetail").style.display = "block";
+}
+
+function closeDetail() {
+    document.getElementById("dayDetail").style.display = "none";
+}
+
+// Gọi API khi vào trang
+loadTimesheet();
+</script>
+
+</body>
+</html>

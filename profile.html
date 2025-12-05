@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile • Smart Attendance</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --navy: #1b3b73;
+      --pink: #ffb6d9;
+      --accent: #0066cc;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: linear-gradient(135deg, #16305f, #ffcee5);
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(8px);
+    }
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+      color: #0b2540;
+      font-weight: 600;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #0b2540;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* Content */
+    main {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      overflow-y: auto;
+    }
+
+    .avatar-wrap {
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.6);
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    /* Form section */
+    form {
+      width: 100%;
+      max-width: 450px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: rgba(255,255,255,0.2);
+      padding: 18px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.95);
+    }
+
+    input {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      background: rgba(255,255,255,0.9);
+      color: #000;
+    }
+
+    input[readonly] {
+      background: rgba(255,255,255,0.6);
+      cursor: not-allowed;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0055a8;
+      transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      form {
+        padding: 14px;
+      }
+      h2 { font-size: 18px; }
+      .avatar-wrap {
+        width: 90px;
+        height: 90px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page">
+    <header>
+      <button class="back-btn" onclick="history.back()">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <h1>Profile</h1>
+      <div></div>
+    </header>
+
+    <main>
+      <div class="avatar-wrap">
+        <img id="avatarImg" src="avatar-placeholder.png" alt="Avatar">
+      </div>
+      <h2 id="profileName">—</h2>
+
+      <form id="profileForm">
+        <label for="employeeID">Employee ID</label>
+        <input type="text" id="employeeID" readonly>
+
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName">
+
+        <label for="email">Email</label>
+        <input type="email" id="email">
+
+        <label for="phone">Phone</label>
+        <input type="text" id="phone">
+
+        <label for="department">Department</label>
+        <input type="text" id="department">
+
+        <button type="submit">Save Changes</button>
+      </form>
+    </main>
+  </div>
+
+  <script>
+    // Load profile info
+    (function () {
+      const id = sessionStorage.getItem("employeeID");
+      const name = sessionStorage.getItem("employeeName");
+      const email = sessionStorage.getItem("employeeEmail");
+      const phone = sessionStorage.getItem("employeePhone");
+      const dept = sessionStorage.getItem("employeeDept");
+      const avatar = sessionStorage.getItem("employeeAvatar");
+
+      if (!id) {
+        location.href = "login.html";
+        return;
+      }
+
+      document.getElementById("employeeID").value = id;
+      document.getElementById("fullName").value = name || "";
+      document.getElementById("email").value = email || "";
+      document.getElementById("phone").value = phone || "";
+      document.getElementById("department").value = dept || "";
+      document.getElementById("profileName").textContent = name || "Your Profile";
+
+      if (avatar) document.getElementById("avatarImg").src = avatar;
+    })();
+
+    // Submit update
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        employeeID: document.getElementById("employeeID").value,
+        fullName: document.getElementById("fullName").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        department: document.getElementById("department").value,
+      };
+
+      const res = await fetch("http://localhost:5000/api/update-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      alert(result.message || "Profile updated!");
+
+      // Optional: Cập nhật sessionStorage
+      sessionStorage.setItem("employeeName", data.fullName);
+      sessionStorage.setItem("employeeEmail", data.email);
+      sessionStorage.setItem("employeePhone", data.phone);
+      sessionStorage.setItem("employeeDept", data.department);
+    });
+  </script>
+</body>
+</html>

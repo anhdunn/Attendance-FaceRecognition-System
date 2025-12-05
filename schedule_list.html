@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Schedule - Smart Attendance</title>
+<link rel="stylesheet" href="shift_list.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>Admin</h2>
+    </div>
+    <ul class="menu">
+      <li onclick="location.href='admin_dashboard.html'"><i class="fas fa-home"></i> Dashboard</li>
+      <li onclick="location.href='employee_list.html'"><i class="fas fa-users"></i> Employees</li>
+      <li onclick="location.href='department_list.html'"><i class="fas fa-building"></i> Departments</li>
+      <li onclick="location.href='attendance_list.html'"><i class="fas fa-calendar-check"></i> Attendance</li>
+      <li onclick="location.href='shift_list.html'"><i class="fas fa-clock"></i> Work Shifts</li>
+      <li class="active" onclick="location.href='schedule_list.html'"><i class="fas fa-calendar-alt"></i> Work Schedule</li>
+      <li onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</li>
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+  <header>
+    <h1>Work Schedule</h1>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by ID..." oninput="filterSchedule()">
+      </div>
+      <button class="add-btn" onclick="location.href='add_schedule.html'">
+        <i class="fas fa-plus"></i> Add Schedule
+      </button>
+    </div>
+  </header>
+
+
+    <section class="table-section">
+      <table>
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Full Name</th>
+            <th>Shift</th>
+            <th>Work Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTable"></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<script>
+let allSchedules = []; 
+
+async function loadSchedules() {
+  try {
+    const res = await fetch("http://localhost:5000/api/schedule");
+    const schedules = await res.json();
+    allSchedules = schedules; // lưu vào biến toàn cục
+    renderSchedules(schedules);
+  } catch (err) {
+    console.error("❌ Error loading schedules:", err);
+  }
+}
+
+function renderSchedules(list) {
+  const table = document.getElementById("scheduleTable");
+  table.innerHTML = "";
+
+  list.forEach(s => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.EmployeeID}</td>
+      <td>${s.E_FullName || '(Unknown)'}</td>
+      <td>${s.CaName}</td>
+      <td>${new Date(s.WorkDate).toLocaleDateString()}</td>
+      <td>
+        <button class="action-btn edit" title="Edit Schedule"
+          onclick="editSchedule('${s.EmployeeID}','${s.CaName}','${s.WorkDate}')">✏️</button>
+        <button class="action-btn delete" title="Delete Schedule"
+          onclick="deleteSchedule('${s.EmployeeID}','${s.CaName}','${s.WorkDate}')">🗑️</button>
+      </td>
+    `;
+    table.appendChild(tr);
+  });
+}
+
+function filterSchedule() {
+  const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+  const filtered = allSchedules.filter(s =>
+    s.EmployeeID.toString().includes(keyword) ||
+    (s.E_FullName && s.E_FullName.toLowerCase().includes(keyword))
+  );
+  renderSchedules(filtered);
+}
+
+function editSchedule(employeeID, caName, workDate) {
+  const dateParam = encodeURIComponent(workDate.split("T")[0]);
+  window.location.href = `edit_schedule.html?EmployeeID=${employeeID}&CaName=${caName}&WorkDate=${dateParam}`;
+}
+
+async function deleteSchedule(employeeID, caName, workDate) {
+  if (!confirm(`Delete schedule for Employee ${employeeID} - ${caName}?`)) return;
+  const dateParam = encodeURIComponent(workDate.split("T")[0]);
+  const res = await fetch(`http://localhost:5000/api/schedule/${employeeID}/${caName}/${dateParam}`, {
+    method: "DELETE",
+  });
+  if (res.ok) {
+    alert("✅ Schedule deleted successfully!");
+    loadSchedules();
+  } else {
+    alert("❌ Failed to delete schedule!");
+  }
+}
+
+function handleLogout() {
+  sessionStorage.clear();
+  window.location.href = "login.html";
+}
+
+loadSchedules();
+</script>
+</body>
+</html>
+    
