@@ -27,7 +27,7 @@
     <input type="week" id="weekInput">
     <input type="month" id="monthInput" style="display:none">
 
-    <div id="rangeInput" style="display:none; gap: 10px;">
+    <div id="rangeInput" style="display:none; gap:10px;">
         <input type="date" id="startDate">
         <input type="date" id="endDate">
     </div>
@@ -45,69 +45,14 @@
         <li id="main" onclick="navigate('manager_dashboard.html', this)">Manager Dashboard</li>
         <li id="menu-approval" onclick="navigate('manager_approval.html', this)">Approval Requests</li>
         <li id="menu-attendance" onclick="navigate('view_team_attendance.html', this)">Team Attendance</li>
-        <li id="menu-kpi" onclick="navigate('team_kpi.html', this)">Performance & KPI</li>
         <li id="menu-members" onclick="navigate('team_members.html', this)">Team Members</li>
     </ul>
 </div>
 
 <script>
-        async function checkNewRequests() {
-    try {
-        const res = await fetch("http://localhost:5000/api/leave-requests-list");
-        const requests = await res.json();
+let chartInstance = null;
 
-        const approvalMenu = document.getElementById("menu-approval");
-
-        // Xóa badge cũ
-        const oldBadge = approvalMenu.querySelector(".badge");
-        if (oldBadge) oldBadge.remove();
-
-        if (requests.length > 0) {
-            // Thêm badge
-            const badge = document.createElement("span");
-            badge.classList.add("badge");
-            badge.textContent = requests.length; // số request mới
-            approvalMenu.appendChild(badge);
-        }
-    } catch (err) {
-        console.error("Failed to check new requests", err);
-    }
-}
-
-    // Check ngay khi load
-    document.addEventListener("DOMContentLoaded", () => {
-        checkNewRequests();
-        // Check định kỳ mỗi 30 giây
-        setInterval(checkNewRequests, 30000);
-    });
-    
-        function navigate(url, element) {
-    // Xóa class active của các li khác
-    document.querySelectorAll('.sidebar li').forEach(li => li.classList.remove('active'));
-
-    // Thêm class active cho li vừa click
-    element.classList.add('active');
-
-    // Chuyển trang
-    location.href = url;
-}
-    // ✅ Tự động đánh dấu menu theo trang hiện tại khi load
-document.addEventListener("DOMContentLoaded", () => {
-    const path = location.pathname.split("/").pop(); // lấy file html hiện tại
-    const menuMap = {
-        "manager_approval.html": "menu-approval", 
-        "manager_dashboard.html" : "main",
-        "view_team_attendance.html": "menu-attendance",
-        "team_kpi.html": "menu-kpi",
-        "team_members.html": "menu-members"
-    };
-
-    const activeId = menuMap[path];
-    if (activeId) {
-        const el = document.getElementById(activeId);
-        if (el) el.classList.add('active');
-    }
-});
+/* ================= AUTH & INIT ================= */
 document.addEventListener("DOMContentLoaded", () => {
     const employeeName = sessionStorage.getItem("employeeName");
     const employeeRole = sessionStorage.getItem("employeeRole");
@@ -118,63 +63,84 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     document.getElementById("welcomeName").textContent = employeeName;
-    loadChart(); // <-- Load biểu đồ lần đầu
-});
 
+    markActiveMenu();
+    checkNewRequests();
+    setInterval(checkNewRequests, 30000);
 
-/* ✅ Toggle hiển thị input tùy theo filter */
-document.getElementById("filterType").addEventListener("change", () => {
-    const type = document.getElementById("filterType").value;
-
-    document.getElementById("weekInput").style.display = type === "week" ? "block" : "none";
-    document.getElementById("monthInput").style.display = type === "month" ? "block" : "none";
-    document.getElementById("rangeInput").style.display = type === "range" ? "flex" : "none";
-});
-
-
-document.getElementById("applyFilter").addEventListener("click", () => {
-    // ❗ TẠM THỜI GÁN CỨNG BIỂU ĐỒ (chưa fetch DB)
     loadChart();
 });
 
+/* ================= MENU ================= */
+function navigate(url, element) {
+    document.querySelectorAll('.sidebar li')
+        .forEach(li => li.classList.remove('active'));
 
-let chartInstance = null;
+    element.classList.add('active');
+    location.href = url;
+}
 
+function markActiveMenu() {
+    const path = location.pathname.split("/").pop();
+    const menuMap = {
+        "manager_dashboard.html": "main",
+        "manager_approval.html": "menu-approval",
+        "view_team_attendance.html": "menu-attendance",
+        "team_members.html": "menu-members"
+    };
+
+    const activeId = menuMap[path];
+    if (activeId) {
+        document.getElementById(activeId)?.classList.add("active");
+    }
+}
+
+/* ================= FILTER ================= */
+document.getElementById("filterType").addEventListener("change", () => {
+    const type = filterType.value;
+
+    weekInput.style.display = type === "week" ? "block" : "none";
+    monthInput.style.display = type === "month" ? "block" : "none";
+    rangeInput.style.display = type === "range" ? "flex" : "none";
+});
+
+document.getElementById("applyFilter").addEventListener("click", loadChart);
+
+/* ================= CHART ================= */
 function loadChart() {
     const ctx = document.getElementById("teamChart");
 
-    // Xóa chart cũ nếu có
     if (chartInstance) {
         chartInstance.destroy();
     }
 
     chartInstance = new Chart(ctx, {
+        type: "bar", // ✅ REQUIRED for mixed charts
         data: {
             labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
             datasets: [
                 {
-                    type: "bar",
                     label: "Late",
                     data: [3, 1, 4, 2, 3],
-                    backgroundColor: "rgba(255, 99, 132, 0.6)",
+                    backgroundColor: "rgba(255,99,132,0.6)",
                     borderRadius: 8
                 },
                 {
-                    type: "bar",
                     label: "Absent",
                     data: [1, 0, 2, 1, 1],
-                    backgroundColor: "rgba(150, 199, 255, 0.7)",
+                    backgroundColor: "rgba(150,199,255,0.7)",
                     borderRadius: 8
                 },
                 {
                     type: "line",
                     label: "On-time Rate (%)",
                     data: [86, 92, 88, 95, 90],
-                    borderColor: "rgba(90, 80, 255, 1)",
+                    borderColor: "rgba(90,80,255,1)",
                     borderWidth: 3,
                     tension: 0.4,
-                    pointBackgroundColor: "white",
-                    pointRadius: 4
+                    pointBackgroundColor: "#fff",
+                    pointRadius: 4,
+                    yAxisID: "y"
                 }
             ]
         },
@@ -184,12 +150,35 @@ function loadChart() {
                 legend: { position: "top" }
             },
             scales: {
-                y: { beginAtZero: true }
+                y: {
+                    beginAtZero: true
+                }
             }
         }
     });
 }
 
+/* ================= APPROVAL BADGE ================= */
+async function checkNewRequests() {
+    try {
+        const res = await fetch("http://localhost:5000/api/leave-requests-list");
+        const requests = await res.json();
+
+        const approvalMenu = document.getElementById("menu-approval");
+        approvalMenu.querySelector(".badge")?.remove();
+
+        if (requests.length > 0) {
+            const badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = requests.length;
+            approvalMenu.appendChild(badge);
+        }
+    } catch (err) {
+        console.error("Failed to check new requests", err);
+    }
+}
+
+/* ================= LOGOUT ================= */
 function logout() {
     sessionStorage.clear();
     location.href = "login.html";
